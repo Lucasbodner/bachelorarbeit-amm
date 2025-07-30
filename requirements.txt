@@ -1,0 +1,6 @@
+streamlit
+torch
+pandas
+numpy<2
+transformers
+python-dotenv
