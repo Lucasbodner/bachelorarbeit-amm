@@ -18,3 +18,4 @@ data/conversations.txt
 # Model weights
 /model/*.gguf
 
+.DS_Store
