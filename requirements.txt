@@ -1,6 +1,8 @@
-streamlit
-torch
-pandas
-numpy<2
-transformers
-python-dotenv
+streamlit        # UI web
+pandas           # utilisé dans utils/storage pour l'export JSONL
+numpy<2          # dépendance indirecte de pandas (évite conflits)
+
+# Pas nécessaires actuellement :
+# torch
+# transformers
+# python-dotenv
