@@ -1,7 +1,7 @@
 # 🧠 Bachelorarbeit – AMM Mobile App
 
 This project is part of my Bachelor's thesis at **DFKI** and **HTW Saar**.  
-It aims to develop a privacy-preserving mobile/web application that integrates an **🧠 Artificial Mental Model (AMM)** to support healthcare professionals with **local inference** and **offline functionality**.
+It demonstrates a **privacy-preserving prototype** that integrates an **Artificial Mental Model (AMM)** for healthcare support, running fully **locally** with no internet connection.
 
 ---
 
@@ -14,6 +14,7 @@ It aims to develop a privacy-preserving mobile/web application that integrates a
 - [Installation & Usage](#-installation--usage)  
 - [Model Parameters](#-model-parameters)  
 - [Features](#-features)  
+- [UI Pages](#-ui-pages)  
 - [Current Status](#-current-status)  
 - [Author](#-author)  
 - [Timeline](#-timeline)  
@@ -22,14 +23,14 @@ It aims to develop a privacy-preserving mobile/web application that integrates a
 
 ## 📜 Project Description
 
-The goal is to create a **local, lightweight prototype** that runs a quantized Artificial Mental Model directly on a user device (e.g., laptop, smartphone, tablet).  
-The interface is built with **Streamlit** (as a web prototype) and will later be adapted to better fit mobile platforms.  
+The goal is to build a **local, lightweight prototype** of an AMM-powered app for healthcare professionals and patients.  
+It uses **Streamlit** as a cross-platform interface (desktop & mobile web-friendly).  
 
-Main objectives:
-- Demonstrate **local inference** with a `.gguf` model (Llama).  
-- Provide a **simple UI** for asking questions and saving responses.  
-- Ensure **privacy-preserving** execution (everything stays on device).  
-- Prepare the ground for **healthcare-related use cases**.  
+Core objectives:
+- Run **local inference** with a quantized `.gguf` model via `llama.cpp`.  
+- Provide a **multi-page UI**: Overview, Health Profile, Patient Q/A, and Physio Dashboard.  
+- Save **conversations locally** (JSONL format).  
+- Ensure strict **privacy**: nothing leaves the device.  
 
 ---
 
@@ -37,7 +38,7 @@ Main objectives:
 
 ```
 bachelorarbeit-amm/
-├── app.py                   # Main Streamlit application
+├── app.py                   # Main Streamlit application (UI + llama.cpp integration)
 ├── requirements.txt         # Dependencies
 ├── README.md                # Project description & setup
 
@@ -48,31 +49,28 @@ bachelorarbeit-amm/
 ├── utils/                   
 │   └── storage.py           # Save/load/export conversations
 ├── data/                    
-│   └── conversations.jsonl  # Conversation history
+│   └── conversations.jsonl  # Conversation history (auto-created)
 ├── doc/                     # Notes, articles, diagrams, screenshots
+├── assets/                  # Logos & images for UI
 ```
 
 ---
 
 ## 🧠 About the AMM
 
-This application integrates a quantized **Artificial Mental Model (AMM)** based on a local LLaMA model in `.gguf` format.  
-
-- Fully **offline** execution (no internet required).  
-- Based on **llama.cpp** via the local `llama-cli` binary.  
-- UI for asking questions and viewing responses.  
-- Conversation history stored locally (`JSONL` format).  
-
-The AMM is designed as a proof-of-concept to **assist healthcare professionals** with decision support in **remote or privacy-sensitive environments**.  
+- **Artificial Mental Model (AMM):** a concept to capture patient expectations and support therapy decisions.  
+- Based on **LLaMA in `.gguf` format**, executed with **llama.cpp** (`llama-cli`).  
+- Fully **offline**, ensuring medical data privacy.  
+- Provides **personalized, explainable answers** and **visual insights** into patient traits and progress.  
 
 ---
 
 ## 🔐 Privacy & Offline Functionality
 
-- All inference and storage happens **locally**.  
-- No data is sent over the internet.  
-- Conversations are stored in `data/conversations.jsonl`.  
-- Future extension: **encryption** of saved data.  
+- **All inference and storage happen locally**.  
+- No API calls, no cloud servers, no data transmission.  
+- History is stored in `data/conversations.jsonl`.  
+- Future extension: add **optional encryption** for stored data.  
 
 ---
 
@@ -93,7 +91,7 @@ pip install -r requirements.txt
 
 ### 3. Place the model
 
-Put your quantized `.gguf` model inside the `model/` folder, e.g.:
+Copy your quantized `.gguf` model into the `model/` folder:
 
 ```
 model/Llama-3.2-1B-merged-lora-q4_k.gguf
@@ -101,71 +99,72 @@ model/Llama-3.2-1B-merged-lora-q4_k.gguf
 
 ### 4. Make sure the llama-cli binary is executable
 
-Check that `bin/llama-cli` exists and is executable:
-
 ```bash
 chmod +x bin/llama-cli
 ```
 
-### 5. Run the prototype
+### 5. Run the app
 
 ```bash
 streamlit run app.py
 ```
 
-The app will launch at `http://localhost:8501`.
+The app will open at [http://localhost:8501](http://localhost:8501).  
+👉 Accessible via desktop browser and **mobile browser (same Wi-Fi/local network)**.
 
 ---
 
 ## 🔧 Model Parameters
 
-In `app.py`, generation is controlled with:
-
-```bash
--n   # max tokens (e.g. 800–1200 for concise answers)
--t   # threads (6–8 recommended on CPU)
--b   # batch size (512–2048 depending on hardware)
---no-warmup   # skip warmup for faster start
-```
-
-👉 Example:
+Configurable in `app.py`:
 
 ```python
-cmd = [
-    BIN_PATH, "-m", MODEL_PATH,
-    "-p", prompt,
-    "-n", "800",
-    "-t", "6",
-    "-b", "1024",
-    "--no-warmup"
-]
+DEFAULT_MAX_TOKENS = "800"   # length of generation
+DEFAULT_THREADS    = "6"     # number of CPU threads
+DEFAULT_BATCH      = "1024"  # batch size
+DEFAULT_NOWARMUP   = True    # skip warmup for faster start
+```
+
+Example command run internally:
+
+```bash
+llama-cli -m model/Llama-3.2-1B-merged-lora-q4_k.gguf   -p "How can AI support physiotherapy?"   -n 800 -t 6 -b 1024 --no-warmup
 ```
 
 ---
 
 ## ✨ Features
 
-- **Local inference** with `.gguf` model via `llama-cli`.  
-- **Simple UI** to ask questions and get responses.  
-- **Response history** with timestamp, latency, question & answer.  
-- **Export to JSONL** → download all conversations.  
-- **Clear history** → reset conversations.  
-- **Error handling**:  
-  - Missing model → clear error message.  
-  - Missing binary → instructions shown.  
-  - Empty question → warning instead of crash.  
+- **Local inference** via `llama.cpp` with `.gguf` models.  
+- **Multi-page UI** (Overview, Health Profile, Patient Q/A, Physio Corner).  
+- **Mobile-friendly design** (responsive Streamlit layout).  
+- **Conversation history** saved locally (JSONL).  
+- **Export & clear** conversation history.  
+- **Charts & insights** (Altair/Streamlit).  
+- **Robust error handling**:  
+  - Missing model/binary → clear error message.  
+  - Empty input → warning.  
+  - Runtime logs viewable in debug expander.  
+
+---
+
+## 📱 UI Pages
+
+1. **Overview** – Project context, AMM concept, privacy approach.  
+2. **My Health Profile** – Patient demographics, health status, Big Five traits, exercise difficulty.  
+3. **Patient Corner** – Q/A with the AMM, local chat history, export/clear options.  
+4. **Physio Corner** – Patient profile summary, difficulty scores (chart), personality traits vs. norms (chart).  
 
 ---
 
 ## ✅ Current Status
 
-- ✅ Local prototype running with `.gguf` model.  
-- ✅ UI with Streamlit.  
-- ✅ History stored & exportable (JSONL).  
-- ✅ Error handling implemented.  
-- ✅ Functional tests passed (S7).  
-- 🛠️ Documentation + screenshots in progress (S8).  
-- 🔒 Encryption planned for later.  
+- ✅ Local prototype fully functional.  
+- ✅ Responsive UI tested on desktop and mobile browsers.  
+- ✅ Conversation history with export/clear.  
+- ✅ Charts (Altair with fallback).  
+- 🟡 Documentation & screenshots in progress.  
+- 🔒 Encryption planned as future work.  
 
 ---
 
@@ -182,10 +181,10 @@ Bachelor student at **HTW Saar** / Intern at **DFKI**
 | Week | Task                                    | Status     |
 |------|-----------------------------------------|------------|
 | S1–S2 | Planning, literature review             | ✅ Done     |
-| S3    | Project setup, UI base                  | ✅ Done     |
-| S4    | Model integration, inference tests      | ✅ Done     |
-| S5    | UI adjustments, repo cleanup            | ✅ Done     |
-| S6    | Storage system, error cases             | ✅ Done     |
-| S7    | Full testing, optimizations, demo       | ✅ Done     |
-| S8    | Screenshots, documentation, bug fixes   | 🟡 Ongoing |
-| S9–S12 | Thesis writing & finalization          | ⏳ Planned |
+| S3    | Project setup, base UI (FedWell)        | ✅ Done     |
+| S4    | Model integration (llama.cpp)           | ✅ Done     |
+| S5    | UI improvements & cleanup               | ✅ Done     |
+| S6    | Local storage, export/clear functions   | ✅ Done     |
+| S7    | Full testing, demo preparation          | ✅ Done     |
+| S8    | Documentation, screenshots              | ✅ Done     |
+| S9–S12 | Thesis writing & finalization          | 🟡 Ongoing  |
