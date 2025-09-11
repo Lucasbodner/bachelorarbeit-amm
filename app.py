@@ -16,7 +16,7 @@ import streamlit as st
 import pandas as pd
 from typing import Optional
 
-# Altair is optional: we fall back to st.bar_chart if it's not available
+# Altair is optional (we fall back to st.bar_chart if it's not available)
 try:
     import altair as alt
     ALTAIR_AVAILABLE = True
@@ -36,31 +36,61 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Chat-like styling + mobile tweaks
 st.markdown("""
-    <style>
-    body { background-color: #f9f9f9; }
-    .main {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    }
-    .stTextArea textarea { border-radius: 12px; border: 1px solid #2E86C1; }
-    .stButton button {
-        background-color: #2E86C1; color: white; border-radius: 12px;
-        padding: 0.8em 1.1em; font-weight: 600;
-    }
-    .message-card {
-        border: 1px solid #ddd; border-radius: 12px; padding: 12px;
-        margin-bottom: 12px; background-color: #fdfdfd;
-    }
-    .user-msg {color: #1A5276; font-weight: 600;}
-    .amm-msg  {color: #117A65;}
-    .footer { text-align: center; color: gray; font-size: 0.9em; margin-top: 20px; }
-    h1.center { text-align:center; color:#2E86C1; }
-    p.center  { text-align:center; }
-    </style>
+<style>
+/* Container width for desktop + full-bleed on mobile */
+.main { max-width: 900px; margin: auto; padding: 0 12px; }
+
+/* Basic look & feel */
+body { background-color: #f9f9f9; }
+.message-card {
+    border: 1px solid #ddd; border-radius: 12px; padding: 12px;
+    margin-bottom: 12px; background-color: #fdfdfd;
+}
+.user-msg { color: #1A5276; font-weight: 600; }
+.amm-msg  { color: #117A65; }
+
+/* Chat bubbles (used by st.chat_message) */
+.chat-bubble { border-radius: 14px; padding: 12px 14px; margin: 8px 0; line-height: 1.5; }
+.user      { background: #eef3ff; border: 1px solid #d8e4ff; }
+.assistant { background: #f6fffa; border: 1px solid #d7f1e3; }
+
+/* Sticky composer on mobile */
+@media (max-width: 640px) {
+  .block-container { padding-top: 0.5rem; }
+  .composer { position: sticky; bottom: 0; background: white; padding: 10px 8px 14px; border-top: 1px solid #eee; }
+}
+
+/* Buttons */
+.stButton button {
+    background-color: #2E86C1; color: white; border-radius: 12px;
+    padding: 0.8em 1.1em; font-weight: 600;
+}
+
+/* Headers */
+h1.center { text-align:center; color:#2E86C1; }
+p.center  { text-align:center; color:#475467; }
+.footer { text-align: center; color: #98A2B3; font-size: 0.9em; margin-top: 20px; }
+</style>
 """, unsafe_allow_html=True)
+
+# =========================
+#    COMPAT HELPERS (width)
+# =========================
+def st_responsive_altair(chart):
+    """Render an Altair chart full-width in a way that works across Streamlit versions."""
+    try:
+        return st.altair_chart(chart, width="stretch")
+    except TypeError:
+        return st.altair_chart(chart, use_container_width=True)
+
+def st_responsive_image(*args, **kwargs):
+    """Render an image full-width (or fallback) across Streamlit versions."""
+    try:
+        return st.image(*args, width="stretch", **{k: v for k, v in kwargs.items() if k != "use_container_width"})
+    except TypeError:
+        return st.image(*args, use_container_width=True, **{k: v for k, v in kwargs.items() if k != "width"})
 
 # =========================
 #    CONSTANTS & DEFAULTS
@@ -72,6 +102,8 @@ DEFAULT_MAX_TOKENS = 800
 DEFAULT_THREADS    = max(1, multiprocessing.cpu_count() // 2)
 DEFAULT_BATCH      = 1024
 DEFAULT_NOWARMUP   = True
+DEFAULT_TEMPERATURE = 0.7   # optional, works with llama-cli
+DEFAULT_TOP_P       = 0.9   # optional, works with llama-cli
 
 # =========================
 #     SESSION STATE INIT
@@ -102,13 +134,13 @@ def header_with_logos(title: str):
     with col1:
         logo_fw = find_asset("assets/fedwell_logo.png", "assets/assets/fedwell_logo.png")
         if logo_fw:
-            st.image(logo_fw, width=120)
+            st.image(logo_fw, width=120)  # fixed size is fine for logos
     with col2:
         st.markdown(f"<h1 class='center'>{title}</h1>", unsafe_allow_html=True)
     with col3:
         logo_dfki = find_asset("assets/dfki_logo2.png", "assets/assets/dfki_logo2.png")
         if logo_dfki:
-            st.image(logo_dfki, width=70)
+            st.image(logo_dfki, width=70)  # fixed size is fine for logos
 
 def preflight_checks(bin_path: str, model_path: str) -> bool:
     ok = True
@@ -123,6 +155,9 @@ def preflight_checks(bin_path: str, model_path: str) -> bool:
         ok = False
     return ok
 
+# =========================
+#       MODEL INVOCATION
+# =========================
 def generate_response(
     prompt: str,
     bin_path: str,
@@ -131,31 +166,85 @@ def generate_response(
     threads: int,
     batch: int,
     no_warmup: bool,
+    temperature: float,
+    top_p: float,
 ):
     """
     Execute `llama-cli` and return (filtered_response, latency_ms, stderr_text).
+    Notes:
+    - Minimal instruction template that models follow well.
+    - No stop tokens (those can trigger immediate stops).
+    - If the first try returns empty, retry once with the raw prompt.
     """
-    cmd = [
-        bin_path, "-m", model_path, "-p", prompt,
-        "-n", str(max_tokens), "-t", str(threads), "-b", str(batch),
-    ]
-    if no_warmup:
-        cmd.append("--no-warmup")
+    # 1) Minimal formatting to guide the model
+    formatted_prompt = (
+        "You are a helpful physiotherapy assistant. "
+        "Respond in clear Markdown with these sections: **Summary**, **Steps**, **Cautions**. "
+        "Use short bullet points. Avoid repeating the prompt.\n\n"
+        f"{prompt.strip()}\n\n"
+        "Answer:"
+    )
 
-    t0 = time.time()
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    latency_ms = int((time.time() - t0) * 1000)
+    def _run(llm_prompt: str):
+        cmd = [
+            bin_path, "-m", model_path,
+            "-p", llm_prompt,
+            "-n", str(max_tokens),
+            "-t", str(threads),
+            "-b", str(batch),
+            "--temp", str(temperature),
+            "--top-p", str(top_p),
+        ]
+        if no_warmup:
+            cmd.append("--no-warmup")
 
-    raw = proc.stdout or ""
-    filtered = [
-        ln for ln in raw.strip().splitlines()
-        if not ln.startswith((
-            "llama_", "ggml_", "build:", "main:", "load:", "print_info:",
-            "sampler", "generate:", "llama_perf", "system_info:", "ggml_metal_"
-        ))
-    ]
-    response = "\n".join(filtered).strip() or "(empty output)"
-    return response, latency_ms, (proc.stderr or "").strip()
+        t0 = time.time()
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        latency_ms_local = int((time.time() - t0) * 1000)
+
+        raw = proc.stdout or ""
+        # Keep only non-llama.cpp log lines
+        filtered_lines = [
+            ln for ln in raw.strip().splitlines()
+            if not ln.startswith((
+                "llama_", "ggml_", "build:", "main:", "load:", "print_info:",
+                "sampler", "generate:", "llama_perf", "system_info:", "ggml_metal_"
+            ))
+        ]
+        response_text = "\n".join(filtered_lines).strip()
+        return response_text, latency_ms_local, (proc.stderr or "").strip()
+
+    # 2) First attempt
+    response, latency_ms, stderr_txt = _run(formatted_prompt)
+
+    # 3) Fallback if empty
+    if not response:
+        response, latency_ms, stderr_txt = _run(prompt.strip())
+
+    if not response:
+        response = "(no tokens generated — try a shorter question or fewer max tokens)"
+    return response, latency_ms, stderr_txt
+
+def _postprocess_text(text: str) -> str:
+    """Clean output and shape into readable Markdown."""
+    if not text:
+        return "(no tokens generated — try a shorter question)"
+    # Remove empty lines & deduplicate consecutive identical lines
+    lines = [l.strip() for l in text.splitlines() if l.strip()]
+    deduped = []
+    last = None
+    for l in lines:
+        if l != last:
+            deduped.append(l)
+        last = l
+    text = "\n".join(deduped)
+    # If it's one long paragraph, convert to bullets for readability
+    if "\n\n" not in text and len(text) > 400:
+        import re
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        bullets = "\n".join(f"- {s}" for s in sentences if s)
+        text = f"**Summary:**\n\n{bullets}"
+    return text
 
 def format_ts(ts=None):
     return (ts or datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
@@ -174,7 +263,7 @@ This prototype demonstrates an on-device AMM for rehabilitation (privacy-preserv
 
     hero = find_asset("assets/csm_Project_1669_413615496a.png", "assets/assets/csm_Project_1669_413615496a.png")
     if hero:
-        st.image(hero, use_container_width=True)
+        st_responsive_image(hero)
 
     st.subheader("Approach")
     st.write("""
@@ -256,77 +345,95 @@ def page_health_profile():
 
     st.success("Health profile saved locally (session state).")
 
-def page_patient_corner(bin_path: str, model_path: str, max_tokens: int, threads: int, batch: int, no_warmup: bool):
+def page_patient_corner(
+    bin_path: str,
+    model_path: str,
+    max_tokens: int,
+    threads: int,
+    batch: int,
+    no_warmup: bool,
+    temperature: float,
+    top_p: float,
+):
     header_with_logos("Patient Corner")
 
-    st.subheader("💬 Ask the AMM")
-    user_q = st.text_area("Your question", placeholder="Type your question here…", height=120)
+    # Show "history cleared" message after rerun if needed
+    if st.session_state.get("just_cleared"):
+        st.session_state.pop("just_cleared", None)
+        st.toast("History cleared", icon="🧹")
+        st.success("History cleared.")
 
-    c1, c2, c3 = st.columns([2, 2, 1])
-    with c1:
-        gen_clicked = st.button("💡 Generate Response", type="primary", use_container_width=True)
-    with c2:
-        data = export_jsonl()
-        st.download_button("📤 Export History", data=data, file_name="conversations.jsonl",
-                           mime="application/json", key="dl-top", use_container_width=True)
-    with c3:
-        if st.button("🗑️ Clear", help="Delete local conversation history", use_container_width=True):
-            clear_history()
-            st.success("History cleared. Reload the page.")
+    # Display chat history
+    for msg in st.session_state.messages:
+        with st.chat_message("user" if msg["role"] == "user" else "assistant"):
+            st.markdown(msg["content"])
 
-    if gen_clicked:
-        if not user_q.strip():
-            st.warning("⚠️ Please enter a question first.")
-        elif preflight_checks(bin_path, model_path):
-            # Light context from Health Profile for better answers
-            ud = st.session_state.user_data
-            context = (
-                "You are a helpful assistant for physiotherapy. "
-                "Answer clearly and concisely. "
-                "Patient context (may be partial): "
-                f"Age={ud.get('Age','?')}, Gender={ud.get('Gender','?')}, "
-                f"Health={ud.get('Overall_health_status','?')}, Mobility={ud.get('Current_mobility','?')}.\n\n"
+    # Composer (sticky on mobile)
+    with st.container():
+        st.markdown('<div class="composer">', unsafe_allow_html=True)
+        user_q = st.chat_input("Type your message…")
+        col1, col2, col3 = st.columns([2, 2, 1])
+        with col2:
+            data = export_jsonl()
+            st.download_button("Export history", data=data, file_name="conversations.jsonl",
+                               mime="application/json", key="dl-chat")
+        with col3:
+            if st.button("Clear"):
+                clear_history()
+                st.session_state.messages = []
+                st.session_state.just_cleared = True
+                try:
+                    st.rerun()
+                except Exception:
+                    # Fallback for older Streamlit versions
+                    st.experimental_rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    if user_q is None:
+        return
+
+    # Append user message
+    st.session_state.messages.append({"role": "user", "content": user_q})
+    with st.chat_message("user"):
+        st.markdown(user_q)
+
+    # Checks + build prompt with light context
+    if not preflight_checks(bin_path, model_path):
+        return
+
+    ud = st.session_state.get("user_data", {})
+    context = (
+        "Patient context (may be partial): "
+        f"Age={ud.get('Age','?')}, Gender={ud.get('Gender','?')}, "
+        f"Health={ud.get('Overall_health_status','?')}, Mobility={ud.get('Current_mobility','?')}.\n\n"
+    )
+    full_prompt = context + f"Question: {user_q}\n\n"
+
+    # Call model
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking…"):
+            resp, latency_ms, stderr_txt = generate_response(
+                prompt=full_prompt,
+                bin_path=bin_path,
+                model_path=model_path,
+                max_tokens=max_tokens,
+                threads=threads,
+                batch=batch,
+                no_warmup=no_warmup,
+                temperature=temperature,
+                top_p=top_p,
             )
-            full_prompt = context + user_q.strip()
+        resp = _postprocess_text(resp)
+        st.markdown(resp)
+        st.caption(f"⏱ {latency_ms} ms")
 
-            with st.spinner("🤖 Generating response..."):
-                resp, latency_ms, stderr_txt = generate_response(
-                    prompt=full_prompt,
-                    bin_path=bin_path,
-                    model_path=model_path,
-                    max_tokens=max_tokens,
-                    threads=threads,
-                    batch=batch,
-                    no_warmup=no_warmup,
-                )
+        # Persist
+        save_message(user_q.strip(), resp, latency_ms)
+        st.session_state.messages.append({"role": "assistant", "content": resp})
 
-            st.markdown("### ✅ Response")
-            st.markdown(f"<div class='message-card'><span class='amm-msg'>{resp}</span></div>", unsafe_allow_html=True)
-            st.caption(f"⏱️ Latency: {latency_ms} ms")
-
-            # Save to local JSONL + on-screen timeline
-            save_message(user_q.strip(), resp, latency_ms)
-            st.session_state.messages.append({"role": "user", "content": user_q.strip()})
-            st.session_state.messages.append({"role": "assistant", "content": resp})
-
-            if stderr_txt:
-                with st.expander("⚙️ Runtime details (stderr)"):
-                    st.code(stderr_txt)
-
-    st.markdown("---")
-    st.subheader("📜 Recent history")
-    history = list(reversed(load_last(10)))
-    if not history:
-        st.info("No history yet.")
-    else:
-        for rec in history:
-            st.markdown(f"""
-            <div class='message-card'>
-                <div class='user-msg'>👤 {rec.get('prompt','')}</div>
-                <div class='amm-msg'>🤖 {rec.get('response','')}</div>
-                <small style="color:gray;">⏱ {rec.get('latency_ms','–')} ms · {rec.get('ts','')}</small>
-            </div>
-            """, unsafe_allow_html=True)
+        if stderr_txt:
+            with st.expander("Runtime details"):
+                st.code(stderr_txt)
 
 def _difficulty_chart(df: pd.DataFrame, title: str):
     if ALTAIR_AVAILABLE:
@@ -351,7 +458,7 @@ def _difficulty_chart(df: pd.DataFrame, title: str):
             )
             .properties(width=500)
         )
-        st.altair_chart(chart, use_container_width=True)
+        st_responsive_altair(chart)
     else:
         st.bar_chart(df.set_index("Exercise")["NumericScore"])
 
@@ -385,7 +492,7 @@ def _bigfive_chart(user_data: dict):
             )
             .properties(width=alt.Step(60), height=300)
         )
-        st.altair_chart(chart, use_container_width=True)
+        st_responsive_altair(chart)
     else:
         pivot = df.pivot(index="Trait", columns="Group", values="Score")
         st.bar_chart(pivot)
@@ -465,6 +572,8 @@ def main():
         threads    = st.slider("Threads", min_value=1, max_value=max(1, multiprocessing.cpu_count()), value=DEFAULT_THREADS, step=1)
         batch      = st.slider("Batch size", min_value=16, max_value=4096, value=DEFAULT_BATCH, step=16)
         no_warmup  = st.checkbox("Disable warmup (faster start)", value=DEFAULT_NOWARMUP)
+        temperature = st.slider("Temperature", 0.0, 1.5, DEFAULT_TEMPERATURE, 0.05)
+        top_p       = st.slider("Top-p", 0.1, 1.0, DEFAULT_TOP_P, 0.05)
 
     # Global banner
     st.markdown("<h1 class='center'>🧠 AMM Mobile App</h1>", unsafe_allow_html=True)
@@ -482,6 +591,8 @@ def main():
             threads=threads,
             batch=batch,
             no_warmup=no_warmup,
+            temperature=temperature,
+            top_p=top_p,
         )
     elif choice == "Physio Corner":
         page_physio_corner()
