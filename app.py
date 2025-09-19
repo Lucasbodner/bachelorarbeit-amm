@@ -1,603 +1,717 @@
+# app.py
 """
-AMM Mobile App – Combined UI (FedWell + Local .gguf)
-----------------------------------------------------
-• FedWell-style pages (Overview / Health Profile / Patient / Physio)
-• 100% on-device inference via `llama-cli` (llama.cpp) and a local `.gguf` model
-• Local JSONL history (save/export/clear) via utils/storage.py
-• No Transformers / Torch / HF token required
+Mentalytics – Pilot Flow (Light theme + i18n + per-device local save)
 """
 
 import os
-import time
-import subprocess
+import json
+import uuid
 import datetime
-import multiprocessing
+from typing import Optional, List, Dict, Any
+
 import streamlit as st
 import pandas as pd
-from typing import Optional
 
-# Altair is optional (we fall back to st.bar_chart if it's not available)
+# Optional chart dep
 try:
     import altair as alt
     ALTAIR_AVAILABLE = True
 except Exception:
     ALTAIR_AVAILABLE = False
 
-# Local storage helpers (your existing utils)
-from utils.storage import save_message, load_last, clear_history, export_jsonl
 
-# =========================
-#  PAGE CONFIG & GLOBAL CSS
-# =========================
+# -----------------
+#  APP-WIDE CONFIG
+# -----------------
+APP_NAME = "Mentalytics"
+
 st.set_page_config(
-    page_title="AMM Mobile App – Local Prototype",
+    page_title=APP_NAME,
     page_icon="🧠",
     layout="centered",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
-# Chat-like styling + mobile tweaks
+
+# -----------------
+#  LIGHT THEME CSS
+# -----------------
 st.markdown("""
 <style>
-/* Container width for desktop + full-bleed on mobile */
-.main { max-width: 900px; margin: auto; padding: 0 12px; }
-
-/* Basic look & feel */
-body { background-color: #f9f9f9; }
-.message-card {
-    border: 1px solid #ddd; border-radius: 12px; padding: 12px;
-    margin-bottom: 12px; background-color: #fdfdfd;
+:root{
+  --bg:#ffffff;
+  --fg:#0f172a;            /* slate-900 */
+  --muted:#475569;         /* slate-600 */
+  --subtle:#64748b;        /* slate-500 */
+  --brand:#2563eb;         /* blue-600 */
+  --brand-ghost:#eff6ff;   /* blue-50 */
+  --border:#e2e8f0;        /* slate-200 */
+  --card:#ffffff;
+  --shadow:0 6px 20px rgba(2, 6, 23, 0.06);
 }
-.user-msg { color: #1A5276; font-weight: 600; }
-.amm-msg  { color: #117A65; }
+html, body, .block-container { background: var(--bg); color: var(--fg); }
+.block-container { max-width: 820px; padding-top: 1.2rem; }
 
-/* Chat bubbles (used by st.chat_message) */
-.chat-bubble { border-radius: 14px; padding: 12px 14px; margin: 8px 0; line-height: 1.5; }
-.user      { background: #eef3ff; border: 1px solid #d8e4ff; }
-.assistant { background: #f6fffa; border: 1px solid #d7f1e3; }
+/* Headings */
+h1.center{
+  text-align: center;
+  font-weight: 800;
+  font-size: clamp(26px, 5vw, 38px);
+  letter-spacing: -0.02em;
+  margin: 6px 0 2px 0;
+  color: var(--fg);
+}
+h2, h3 { color: var(--fg); }
+p.center{ text-align:center; color: var(--subtle); }
 
-/* Sticky composer on mobile */
-@media (max-width: 640px) {
-  .block-container { padding-top: 0.5rem; }
-  .composer { position: sticky; bottom: 0; background: white; padding: 10px 8px 14px; border-top: 1px solid #eee; }
+/* Cards */
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+}
+.card h3{ margin: 0 0 6px 0; font-weight: 700; }
+
+/* Buttons (primary) */
+.stButton > button{
+  background: var(--brand);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8em 1.1em;
+  font-weight: 700;
+  letter-spacing: .2px;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, .25);
+}
+.stButton > button:hover{ filter: brightness(1.03); transform: translateY(-1px); }
+
+/* Secondary ghost buttons */
+.ghost button{
+  background: var(--brand-ghost);
+  color: var(--brand);
+  border: 1px solid #dbeafe;
+  box-shadow: none;
 }
 
-/* Buttons */
-.stButton button {
-    background-color: #2E86C1; color: white; border-radius: 12px;
-    padding: 0.8em 1.1em; font-weight: 600;
-}
+/* Language buttons row */
+.lang-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.lang-row .stButton > button{ min-width: 160px; }
 
-/* Headers */
-h1.center { text-align:center; color:#2E86C1; }
-p.center  { text-align:center; color:#475467; }
-.footer { text-align: center; color: #98A2B3; font-size: 0.9em; margin-top: 20px; }
+/* Inputs */
+label, .stSelectbox label, .stRadio > label{ color: var(--muted); font-weight: 600; }
+div[data-baseweb="select"] > div { border-radius:12px; }
+.stSelectbox, .stTextInput, .stNumberInput { margin-bottom: 6px; }
+
+/* Single column form spacing */
+.form-wrap > div{ margin-bottom: 8px; }
+
+/* Footer */
+.footer{ text-align:center; color:#94a3b8; font-size: 12px; margin-top: 28px; }
+
+/* Hide default sidebar background */
+[data-testid="stSidebar"] { background: var(--bg); border-right: 1px solid var(--border); }
+
+/* Tiny helper badges */
+.badge {
+  display:inline-block; padding:4px 10px; font-size:12px;
+  background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe; border-radius:999px;
+}
+hr.soft{ border:none; height:1px; background:var(--border); margin:12px 0;}
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-#    COMPAT HELPERS (width)
-# =========================
-def st_responsive_altair(chart):
-    """Render an Altair chart full-width in a way that works across Streamlit versions."""
-    try:
-        return st.altair_chart(chart, width="stretch")
-    except TypeError:
-        return st.altair_chart(chart, use_container_width=True)
 
-def st_responsive_image(*args, **kwargs):
-    """Render an image full-width (or fallback) across Streamlit versions."""
-    try:
-        return st.image(*args, width="stretch", **{k: v for k, v in kwargs.items() if k != "use_container_width"})
-    except TypeError:
-        return st.image(*args, use_container_width=True, **{k: v for k, v in kwargs.items() if k != "width"})
+# -----------------
+#  I18N STRINGS
+# -----------------
+STRINGS: Dict[str, Dict[str, Any]] = {
+    "en": {
+        "app_title": "Mentalytics: When AI Reads Your Mind",
+        "welcome_intro": "Welcome to our pilot study. Please choose your language to continue.",
+        "lang_fr": "Français", "lang_de": "Deutsch", "lang_en": "English",
+        "consent_title": "Informed Consent of Participation",
+        "consent_intro": "Please review the information below. Tick both boxes to proceed.",
+        "consent_checkbox": "I have read the study information and I agree to participate.",
+        "consent_checkbox2": "I consent to the storage and local processing of my answers as described.",
+        "continue": "Continue",
+        "intro_title": "Before we begin",
+        "intro_body": "This pilot will ask a few questions about you and your health. It should take about 5–7 minutes.",
+        "start_study": "Start the study",
+        "profile_title": "Quick Profile",
+        "save_locally": "Save locally",
+        "saved": "Saved locally.",
+        "next": "Next",
+        "back": "Back",
+        "guidance_title": "Guidance",
+        "device": "Device",
+        "export": "Export data",
+        # Profile fields
+        "age": "Age",
+        "gender": "Gender",
+        "employment": "Employment status",
+        "emotion": "Current emotional state",
+        "disability": "Physical disabilities",
+        "activities": "Physical activities",
+        "days_ex": "Days of exercise per week",
+        "overall_health": "Overall health",
+        "mobility": "Current mobility",
+        "yes": "Yes", "no": "No",
+        "required_note": "Please complete all fields to continue.",
+        # Chart area
+        "anticipated": "Patient Anticipated Pain/Difficulty",
+        "nrs": "Numeric Rating Scale (NRS)",
+        "traits": "Patient Personality Traits & Insights",
+        # Study survey page
+        "study_title": "Study Questions",
+        "save_and_continue": "Save & Continue",
+        # German explainer
+        "de_blurb_title": "Mentalytics: Wenn die KI weiß, wie du dich fühlst",
+        "de_blurb": (
+            "KI zum Anfassen: Mentalytics ist ein KI-Assistent für Rehabilitation und Training. "
+            "Er nutzt künstliche mentale Modelle, berücksichtigt Erwartungen, Fitness und Stimmung – "
+            "und sagt voraus, wie anstrengend eine Übung erlebt wird und ob sie gelingt. "
+            "Die KI schätzt dein Empfinden ein – **bevor** du loslegst. Du wirst überrascht sein, wie gut sie dich kennt."
+        ),
+    },
+    "de": {
+        "app_title": "Mentalytics: Wenn die KI weiß, wie du dich fühlst",
+        "welcome_intro": "Willkommen zu unserer Pilotstudie. Bitte wähle deine Sprache aus, um fortzufahren.",
+        "lang_fr": "Französisch", "lang_de": "Deutsch", "lang_en": "Englisch",
+        "consent_title": "Einverständniserklärung",
+        "consent_intro": "Bitte lies die Infos unten. Kreuze beide Kästchen an, um fortzufahren.",
+        "consent_checkbox": "Ich habe die Studieninformation gelesen und stimme der Teilnahme zu.",
+        "consent_checkbox2": "Ich willige in die lokale Speicherung und Verarbeitung meiner Antworten ein.",
+        "continue": "Weiter",
+        "intro_title": "Bevor wir starten",
+        "intro_body": "Dieses Pilot fragt ein paar Dinge zu dir und deiner Gesundheit (ca. 5–7 Minuten).",
+        "start_study": "Studie starten",
+        "profile_title": "Kurzprofil",
+        "save_locally": "Lokal speichern",
+        "saved": "Lokal gespeichert.",
+        "next": "Weiter",
+        "back": "Zurück",
+        "guidance_title": "Leitfaden",
+        "device": "Gerät",
+        "export": "Daten exportieren",
+        "age": "Alter",
+        "gender": "Geschlecht",
+        "employment": "Beschäftigungsstatus",
+        "emotion": "Aktueller emotionaler Zustand",
+        "disability": "Körperliche Einschränkungen",
+        "activities": "Körperliche Aktivitäten",
+        "days_ex": "Sporttage pro Woche",
+        "overall_health": "Allgemeiner Gesundheitszustand",
+        "mobility": "Aktuelle Mobilität",
+        "yes": "Ja", "no": "Nein",
+        "required_note": "Bitte fülle alle Felder aus, um fortzufahren.",
+        "anticipated": "Erwartete Schmerzen/Schwierigkeit",
+        "nrs": "Numerische Bewertungsskala (NRS)",
+        "traits": "Persönlichkeitsmerkmale & Einblicke",
+        "study_title": "Studienfragen",
+        "save_and_continue": "Speichern & weiter",
+        "de_blurb_title": "Mentalytics: Wenn die KI weiß, wie du dich fühlst",
+        "de_blurb": (
+            "KI zum Anfassen: Mentalytics ist ein KI-Assistent für Rehabilitation und Training. "
+            "Er nutzt künstliche mentale Modelle, berücksichtigt Erwartungen, Fitness und Stimmung – "
+            "und sagt voraus, wie anstrengend eine Übung erlebt wird und ob sie gelingt. "
+            "Die KI schätzt dein Empfinden ein – **bevor** du loslegst. Du wirst überrascht sein, wie gut sie dich kennt."
+        ),
+    },
+    "fr": {
+        "app_title": "Mentalytics : Quand l’IA lit dans vos pensées",
+        "welcome_intro": "Bienvenue dans notre étude pilote. Veuillez choisir votre langue pour continuer.",
+        "lang_fr": "Français", "lang_de": "Allemand", "lang_en": "Anglais",
+        "consent_title": "Consentement éclairé à participer",
+        "consent_intro": "Veuillez lire les informations ci-dessous. Cochez les deux cases pour continuer.",
+        "consent_checkbox": "J’ai lu les informations et j’accepte de participer.",
+        "consent_checkbox2": "J’accepte l’enregistrement local et le traitement décrit de mes réponses.",
+        "continue": "Continuer",
+        "intro_title": "Avant de commencer",
+        "intro_body": "Ce pilote pose quelques questions sur vous et votre santé (environ 5–7 minutes).",
+        "start_study": "Commencer l’étude",
+        "profile_title": "Profil rapide",
+        "save_locally": "Enregistrer en local",
+        "saved": "Enregistré en local.",
+        "next": "Suivant",
+        "back": "Retour",
+        "guidance_title": "Conseils",
+        "device": "Appareil",
+        "export": "Exporter les données",
+        "age": "Âge",
+        "gender": "Genre",
+        "employment": "Statut professionnel",
+        "emotion": "État émotionnel actuel",
+        "disability": "Handicaps physiques",
+        "activities": "Activités physiques",
+        "days_ex": "Jours d’exercice/semaine",
+        "overall_health": "Santé globale",
+        "mobility": "Mobilité actuelle",
+        "yes": "Oui", "no": "Non",
+        "required_note": "Veuillez compléter tous les champs pour continuer.",
+        "anticipated": "Douleur / difficulté anticipée",
+        "nrs": "Échelle numérique (NRS)",
+        "traits": "Traits de personnalité & insights",
+        "study_title": "Questions d’étude",
+        "save_and_continue": "Enregistrer et continuer",
+        "de_blurb_title": "Mentalytics : Quand l’IA lit dans vos pensées",
+        "de_blurb": (
+            "KI zum Anfassen : Mentalytics est un assistant IA pour la rééducation et l’entraînement. "
+            "Il s’appuie sur des modèles mentaux artificiels, prend en compte attentes, forme et humeur – "
+            "et prédit l’effort perçu et la réussite d’un exercice **avant** de commencer."
+        ),
+    },
+}
 
-# =========================
-#    CONSTANTS & DEFAULTS
-# =========================
-DEFAULT_BIN_PATH   = os.path.join("bin", "llama-cli")
-DEFAULT_MODEL_PATH = os.path.join("model", "Llama-3.2-1B-merged-lora-q4_k.gguf")
+# Default language (until user chooses)
+if "lang" not in st.session_state:
+    st.session_state.lang = "en"
 
-DEFAULT_MAX_TOKENS = 800
-DEFAULT_THREADS    = max(1, multiprocessing.cpu_count() // 2)
-DEFAULT_BATCH      = 1024
-DEFAULT_NOWARMUP   = True
-DEFAULT_TEMPERATURE = 0.7   # optional, works with llama-cli
-DEFAULT_TOP_P       = 0.9   # optional, works with llama-cli
+# Step machine: welcome → consent → intro → survey → guidance
+if "step" not in st.session_state:
+    st.session_state.step = "welcome"
 
-# =========================
-#     SESSION STATE INIT
-# =========================
-if "messages" not in st.session_state:
-    st.session_state.messages = []    # chat timeline for Patient Corner
-if "user_data" not in st.session_state:
-    st.session_state.user_data = {}   # health profile / Big Five / scores
 
-# =========================
-#       UI UTILITIES
-# =========================
-def file_exists(path: str) -> bool:
-    try:
-        return os.path.isfile(path)
-    except Exception:
-        return False
+# -----------------
+#  DEVICE ID (per phone)
+# -----------------
+def _short_id() -> str:
+    return uuid.uuid4().hex[:6].upper()
 
+def get_or_create_device_id() -> str:
+    qp = st.query_params
+    if "device" in qp and qp["device"]:
+        device = qp["device"]
+    else:
+        device = _short_id()
+        st.query_params.update({"device": device})
+    st.session_state.device_id = device
+    return device
+
+DEVICE_ID = get_or_create_device_id()
+
+def device_dir(device_id: str) -> str:
+    d = os.path.join("data", device_id)
+    os.makedirs(d, exist_ok=True)
+    return d
+
+def save_json(device_id: str, name: str, payload: dict):
+    d = device_dir(device_id)
+    path = os.path.join(d, f"{name}.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+
+def load_json(device_id: str, name: str) -> dict:
+    path = os.path.join(device_dir(device_id), f"{name}.json")
+    if os.path.isfile(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def export_device_zip_notice():
+    # Export as combined JSON for simplicity
+    consent = load_json(DEVICE_ID, "consent")
+    survey = load_json(DEVICE_ID, "survey")
+    profile = load_json(DEVICE_ID, "profile")
+    bundle = {"device_id": DEVICE_ID, "consent": consent, "survey": survey, "profile": profile}
+    data = json.dumps(bundle, ensure_ascii=False, indent=2)
+    st.download_button(key="export_btn", label=t("export"), data=data,
+                       file_name=f"{DEVICE_ID}_data.json", mime="application/json")
+
+# -----------------
+#  ASSETS
+# -----------------
 def find_asset(*candidates: str) -> Optional[str]:
-    """Return the first existing asset path among provided candidates."""
     for c in candidates:
-        if file_exists(c):
+        if os.path.isfile(c):
             return c
     return None
 
-def header_with_logos(title: str):
-    col1, col2, col3 = st.columns([1, 6, 1])
-    with col1:
-        logo_fw = find_asset("assets/fedwell_logo.png", "assets/assets/fedwell_logo.png")
-        if logo_fw:
-            st.image(logo_fw, width=120)  # fixed size is fine for logos
-    with col2:
-        st.markdown(f"<h1 class='center'>{title}</h1>", unsafe_allow_html=True)
-    with col3:
-        logo_dfki = find_asset("assets/dfki_logo2.png", "assets/assets/dfki_logo2.png")
-        if logo_dfki:
-            st.image(logo_dfki, width=70)  # fixed size is fine for logos
 
-def preflight_checks(bin_path: str, model_path: str) -> bool:
-    ok = True
-    if not os.path.isfile(bin_path):
-        st.error(f"❌ Missing binary: `{bin_path}`.\n\nPlace the compiled `llama-cli` in `bin/`.")
-        ok = False
-    elif not os.access(bin_path, os.X_OK):
-        st.error(f"❌ Binary not executable: `{bin_path}`.\n\nRun:\n```bash\nchmod +x {bin_path}\n```")
-        ok = False
-    if not os.path.isfile(model_path):
-        st.error(f"❌ Missing model: `{model_path}`.\n\nPlace your `.gguf` model in `model/`.")
-        ok = False
-    return ok
+# -----------------
+#  UTIL / I18N
+# -----------------
+def t(key: str) -> str:
+    lang = st.session_state.lang
+    return STRINGS.get(lang, STRINGS["en"]).get(key, key)
 
-# =========================
-#       MODEL INVOCATION
-# =========================
-def generate_response(
-    prompt: str,
-    bin_path: str,
-    model_path: str,
-    max_tokens: int,
-    threads: int,
-    batch: int,
-    no_warmup: bool,
-    temperature: float,
-    top_p: float,
-):
-    """
-    Execute `llama-cli` and return (filtered_response, latency_ms, stderr_text).
-    Notes:
-    - Minimal instruction template that models follow well.
-    - No stop tokens (those can trigger immediate stops).
-    - If the first try returns empty, retry once with the raw prompt.
-    """
-    # 1) Minimal formatting to guide the model
-    formatted_prompt = (
-        "You are a helpful physiotherapy assistant. "
-        "Respond in clear Markdown with these sections: **Summary**, **Steps**, **Cautions**. "
-        "Use short bullet points. Avoid repeating the prompt.\n\n"
-        f"{prompt.strip()}\n\n"
-        "Answer:"
-    )
+def header(title_key: str):
+    st.markdown(f"<h1 class='center'>{t(title_key)}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<p class='center'><span class='badge'>{t('device')}:</span> <strong>{DEVICE_ID}</strong></p>",
+                unsafe_allow_html=True)
 
-    def _run(llm_prompt: str):
-        cmd = [
-            bin_path, "-m", model_path,
-            "-p", llm_prompt,
-            "-n", str(max_tokens),
-            "-t", str(threads),
-            "-b", str(batch),
-            "--temp", str(temperature),
-            "--top-p", str(top_p),
-        ]
-        if no_warmup:
-            cmd.append("--no-warmup")
+def is_all_filled(d: dict) -> bool:
+    return all(v not in (None, "", []) for v in d.values())
 
-        t0 = time.time()
-        proc = subprocess.run(cmd, capture_output=True, text=True)
-        latency_ms_local = int((time.time() - t0) * 1000)
 
-        raw = proc.stdout or ""
-        # Keep only non-llama.cpp log lines
-        filtered_lines = [
-            ln for ln in raw.strip().splitlines()
-            if not ln.startswith((
-                "llama_", "ggml_", "build:", "main:", "load:", "print_info:",
-                "sampler", "generate:", "llama_perf", "system_info:", "ggml_metal_"
-            ))
-        ]
-        response_text = "\n".join(filtered_lines).strip()
-        return response_text, latency_ms_local, (proc.stderr or "").strip()
-
-    # 2) First attempt
-    response, latency_ms, stderr_txt = _run(formatted_prompt)
-
-    # 3) Fallback if empty
-    if not response:
-        response, latency_ms, stderr_txt = _run(prompt.strip())
-
-    if not response:
-        response = "(no tokens generated — try a shorter question or fewer max tokens)"
-    return response, latency_ms, stderr_txt
-
-def _postprocess_text(text: str) -> str:
-    """Clean output and shape into readable Markdown."""
-    if not text:
-        return "(no tokens generated — try a shorter question)"
-    # Remove empty lines & deduplicate consecutive identical lines
-    lines = [l.strip() for l in text.splitlines() if l.strip()]
-    deduped = []
-    last = None
-    for l in lines:
-        if l != last:
-            deduped.append(l)
-        last = l
-    text = "\n".join(deduped)
-    # If it's one long paragraph, convert to bullets for readability
-    if "\n\n" not in text and len(text) > 400:
-        import re
-        sentences = re.split(r'(?<=[.!?])\s+', text)
-        bullets = "\n".join(f"- {s}" for s in sentences if s)
-        text = f"**Summary:**\n\n{bullets}"
-    return text
-
-def format_ts(ts=None):
-    return (ts or datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
-
-# =========================
-#         PAGES
-# =========================
-def page_overview():
-    header_with_logos("MENTALYTICS")
-    st.subheader("Description")
-    st.write("""
-Effective medical rehabilitation depends on good patient–therapist collaboration. Cognitive or psychological barriers can hinder communication and self-assessment.
-Artificial Mental Models (AMMs) can capture patient expectations and support clearer, more personalized decisions.
-This prototype demonstrates an on-device AMM for rehabilitation (privacy-preserving, offline).
-""")
-
-    hero = find_asset("assets/csm_Project_1669_413615496a.png", "assets/assets/csm_Project_1669_413615496a.png")
-    if hero:
-        st_responsive_image(hero)
-
-    st.subheader("Approach")
-    st.write("""
-We integrate a quantized AMM (Llama *.gguf*) executed locally via **llama-cli**.
-The app offers a simple UI for Q/A and a **local** conversation history (export/clear).
-No data ever leaves the device.
-""")
-
-def page_health_profile():
-    header_with_logos("My Health Profile")
-
-    ud = st.session_state.user_data
-
-    st.subheader("Demographics & Health")
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        ud["Age"]   = st.number_input("Age", min_value=1, max_value=120, value=int(ud.get("Age", 30)))
-        ud["Gender"] = st.selectbox("Gender", ["Male", "Female", "Other"],
-                                    index=["Male","Female","Other"].index(ud.get("Gender", "Male")))
-        ud["Employment_status"] = st.selectbox(
-            "Employment Status",
-            ["Employed","Self-Employed","Student","Unemployed","Retired","Other"],
-            index=max(0, ["Employed","Self-Employed","Student","Unemployed","Retired","Other"]
-                      .index(ud.get("Employment_status", "Employed")))
-        )
-    with c2:
-        ud["Current_emotional_state"] = st.text_input("Current emotional state", ud.get("Current_emotional_state", "Calm"))
-        ud["Have_any_physical_disabilities"] = st.selectbox(
-            "Physical disabilities?", ["No", "Yes"],
-            index=["No","Yes"].index(ud.get("Have_any_physical_disabilities", "No"))
-        )
-        ud["Type_of_physical_activities"] = st.text_input(
-            "Physical activities (e.g., Jogging)", ud.get("Type_of_physical_activities", "Jogging")
-        )
-    with c3:
-        ud["How_many_days_do_you_do_exercise"] = st.slider(
-            "Days of exercise/week", 0, 7, int(ud.get("How_many_days_do_you_do_exercise", 3))
-        )
-        ud["Overall_health_status"] = st.selectbox(
-            "Overall health", ["Poor","Fair","Good","Very Good","Excellent"],
-            index=max(0, ["Poor","Fair","Good","Very Good","Excellent"]
-                      .index(ud.get("Overall_health_status","Good")))
-        )
-        ud["Current_mobility"] = st.selectbox(
-            "Current mobility", ["Poor","Fair","Good","Very Good","Excellent"],
-            index=max(0, ["Poor","Fair","Good","Very Good","Excellent"]
-                      .index(ud.get("Current_mobility","Good")))
-        )
-
-    st.subheader("Big Five (Short)")
-    cc1, cc2 = st.columns(2)
-    with cc1:
-        ud["Q21"] = st.number_input("“Extraverted and enthusiastic” (1–7)", 1.0, 7.0, float(ud.get("Q21", 4.0)), 1.0)
-        ud["Q26"] = st.number_input("“Reserved and quiet” (1–7)",           1.0, 7.0, float(ud.get("Q26", 4.0)), 1.0)
-        ud["Extroversion"] = (ud["Q21"] + ud["Q26"]) / 2
-
-        ud["Q22"] = st.number_input("“Critical and quarrelsome” (1–7)",     1.0, 7.0, float(ud.get("Q22", 4.0)), 1.0)
-        ud["Q27"] = st.number_input("“Sympathetic and warm” (1–7)",         1.0, 7.0, float(ud.get("Q27", 4.0)), 1.0)
-        ud["Agreeableness"] = (ud["Q22"] + ud["Q27"]) / 2
-    with cc2:
-        ud["Q28"] = st.number_input("“Disorganized and careless” (1–7)",    1.0, 7.0, float(ud.get("Q28", 4.0)), 1.0)
-        ud["Q23"] = st.number_input("“Dependable and self-disciplined” (1–7)", 1.0, 7.0, float(ud.get("Q23", 4.0)), 1.0)
-        ud["Conscientiousness"] = (ud["Q28"] + ud["Q23"]) / 2
-
-        ud["Q24"] = st.number_input("“Anxious and easily upset” (1–7)",     1.0, 7.0, float(ud.get("Q24", 4.0)), 1.0)
-        ud["Q29"] = st.number_input("“Calm and emotionally stable” (1–7)",  1.0, 7.0, float(ud.get("Q29", 4.0)), 1.0)
-        ud["Emotional_Stability"] = (ud["Q24"] + ud["Q29"]) / 2
-
-    ud["Q30"] = st.number_input("“Conventional, uncreative” (1–7)", 1.0, 7.0, float(ud.get("Q30", 4.0)), 1.0)
-    ud["Q25"] = st.number_input("“Open to new experiences” (1–7)",  1.0, 7.0, float(ud.get("Q25", 4.0)), 1.0)
-    ud["Openness"] = (ud["Q30"] + ud["Q25"]) / 2
-
-    st.subheader("Exercise Difficulty (1–5)")
-    e1, e2, e3, e4 = st.columns(4)
-    with e1: ud["question_answer_string"]  = st.number_input("10 Squats",             1.0, 5.0, float(ud.get("question_answer_string", 3.0)), 1.0)
-    with e2: ud["question_answer_string2"] = st.number_input("10 Calf Raises",        1.0, 5.0, float(ud.get("question_answer_string2", 3.0)), 1.0)
-    with e3: ud["question_answer_string3"] = st.number_input("10 Standing Toe Touch", 1.0, 5.0, float(ud.get("question_answer_string3", 3.0)), 1.0)
-    with e4: ud["question_answer_string4"] = st.number_input("10 Toe Touch Stretch",  1.0, 5.0, float(ud.get("question_answer_string4", 3.0)), 1.0)
-
-    st.success("Health profile saved locally (session state).")
-
-def page_patient_corner(
-    bin_path: str,
-    model_path: str,
-    max_tokens: int,
-    threads: int,
-    batch: int,
-    no_warmup: bool,
-    temperature: float,
-    top_p: float,
-):
-    header_with_logos("Patient Corner")
-
-    # Show "history cleared" message after rerun if needed
-    if st.session_state.get("just_cleared"):
-        st.session_state.pop("just_cleared", None)
-        st.toast("History cleared", icon="🧹")
-        st.success("History cleared.")
-
-    # Display chat history
-    for msg in st.session_state.messages:
-        with st.chat_message("user" if msg["role"] == "user" else "assistant"):
-            st.markdown(msg["content"])
-
-    # Composer (sticky on mobile)
-    with st.container():
-        st.markdown('<div class="composer">', unsafe_allow_html=True)
-        user_q = st.chat_input("Type your message…")
-        col1, col2, col3 = st.columns([2, 2, 1])
-        with col2:
-            data = export_jsonl()
-            st.download_button("Export history", data=data, file_name="conversations.jsonl",
-                               mime="application/json", key="dl-chat")
-        with col3:
-            if st.button("Clear"):
-                clear_history()
-                st.session_state.messages = []
-                st.session_state.just_cleared = True
-                try:
-                    st.rerun()
-                except Exception:
-                    # Fallback for older Streamlit versions
-                    st.experimental_rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    if user_q is None:
-        return
-
-    # Append user message
-    st.session_state.messages.append({"role": "user", "content": user_q})
-    with st.chat_message("user"):
-        st.markdown(user_q)
-
-    # Checks + build prompt with light context
-    if not preflight_checks(bin_path, model_path):
-        return
-
-    ud = st.session_state.get("user_data", {})
-    context = (
-        "Patient context (may be partial): "
-        f"Age={ud.get('Age','?')}, Gender={ud.get('Gender','?')}, "
-        f"Health={ud.get('Overall_health_status','?')}, Mobility={ud.get('Current_mobility','?')}.\n\n"
-    )
-    full_prompt = context + f"Question: {user_q}\n\n"
-
-    # Call model
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking…"):
-            resp, latency_ms, stderr_txt = generate_response(
-                prompt=full_prompt,
-                bin_path=bin_path,
-                model_path=model_path,
-                max_tokens=max_tokens,
-                threads=threads,
-                batch=batch,
-                no_warmup=no_warmup,
-                temperature=temperature,
-                top_p=top_p,
-            )
-        resp = _postprocess_text(resp)
-        st.markdown(resp)
-        st.caption(f"⏱ {latency_ms} ms")
-
-        # Persist
-        save_message(user_q.strip(), resp, latency_ms)
-        st.session_state.messages.append({"role": "assistant", "content": resp})
-
-        if stderr_txt:
-            with st.expander("Runtime details"):
-                st.code(stderr_txt)
-
-def _difficulty_chart(df: pd.DataFrame, title: str):
-    if ALTAIR_AVAILABLE:
-        score_map = {
-            1: "1 - Not difficult",
-            2: "2 - Slightly difficult",
-            3: "3 - Moderately difficult",
-            4: "4 - Very difficult",
-            5: "5 - Extremely difficult"
-        }
-        df = df.copy()
-        df["ScoreLabel"] = df["NumericScore"].map(score_map)
-
-        chart = (
-            alt.Chart(df)
-            .mark_bar(size=30)
-            .encode(
-                x=alt.X("Exercise:O", sort=None, axis=alt.Axis(labelAngle=0, labelOverlap=False)),
-                y=alt.Y("NumericScore:Q", title=title),
-                color=alt.Color("ScoreLabel:N", legend=alt.Legend(title="Difficulty Level"),
-                                sort=list(score_map.values()))
-            )
-            .properties(width=500)
-        )
-        st_responsive_altair(chart)
-    else:
-        st.bar_chart(df.set_index("Exercise")["NumericScore"])
-
-def _bigfive_chart(user_data: dict):
-    traits = ["Extroversion","Agreeableness","Conscientiousness","Emotional Stability","Openness"]
-    norms  = {"Extroversion":4.44,"Agreeableness":5.23,"Conscientiousness":5.4,"Emotional Stability":4.83,"Openness":5.38}
-
-    user_scores = [
-        user_data.get("Extroversion",0),
-        user_data.get("Agreeableness",0),
-        user_data.get("Conscientiousness",0),
-        user_data.get("Emotional_Stability",0),
-        user_data.get("Openness",0)
-    ]
-    data = []
-    for t, s in zip(traits, user_scores):
-        data.append({"Trait":t, "Group":"User", "Score":s})
-        data.append({"Trait":t, "Group":"General Norm", "Score":norms[t]})
-    df = pd.DataFrame(data)
-
-    if ALTAIR_AVAILABLE:
-        chart = (
-            alt.Chart(df)
-            .mark_bar()
-            .encode(
-                x=alt.X("Trait:N", axis=alt.Axis(labelAngle=0), title=None),
-                y=alt.Y("Score:Q", title="Score (out of 7)", scale=alt.Scale(domain=[0,7])),
-                xOffset=alt.XOffset("Group:N", sort=["User","General Norm"]),
-                color=alt.Color("Group:N", legend=alt.Legend(title="Legend")),
-                tooltip=["Trait","Group","Score"]
-            )
-            .properties(width=alt.Step(60), height=300)
-        )
-        st_responsive_altair(chart)
-    else:
-        pivot = df.pivot(index="Trait", columns="Group", values="Score")
-        st.bar_chart(pivot)
-
-def page_physio_corner():
-    header_with_logos("Physio Corner")
-
-    st.subheader("Patient Information & Overall Health Status")
-    ud = st.session_state.get("user_data", {})
+# -----------------
+#  PAGES
+# -----------------
+def page_welcome():
+    st.markdown(f"<h1 class='center'>{t('app_title')}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<p class='center'>{t('welcome_intro')}</p>", unsafe_allow_html=True)
+    st.write("")
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.write(f"**Age**: {ud.get('Age','N/A')}")
-        st.write(f"**Gender**: {ud.get('Gender','N/A')}")
-        st.write(f"**Employment Status**: {ud.get('Employment_status','N/A')}")
+        if st.button(f"🇫🇷 {t('lang_fr')}", use_container_width=True):
+            st.session_state.lang = "fr"
+            st.session_state.step = "consent"
+            st.rerun()
     with c2:
-        st.write(f"**Physical Disabilities**: {ud.get('Have_any_physical_disabilities','N/A')}")
-        st.write(f"**Physical Activities**: {ud.get('Type_of_physical_activities','N/A')}")
-        st.write(f"**Days of Exercise/Week**: {ud.get('How_many_days_do_you_do_exercise','N/A')}")
+        if st.button(f"🇩🇪 {t('lang_de')}", use_container_width=True):
+            st.session_state.lang = "de"
+            st.session_state.step = "consent"
+            st.rerun()
     with c3:
-        st.write(f"**Overall Health Status**: {ud.get('Overall_health_status','N/A')}")
-        st.write(f"**Current Mobility**: {ud.get('Current_mobility','N/A')}")
-        st.write(f"**Current Emotional State**: {ud.get('Current_emotional_state','N/A')}")
-
-    st.write(" ")
-
-    # Exercise difficulty chart
-    df_diff = pd.DataFrame({
-        "Exercise": ["Squats","Calf Raises","Toe Touch","Toe Touch Stretch"],
-        "NumericScore": [
-            ud.get("question_answer_string", 0),
-            ud.get("question_answer_string2",0),
-            ud.get("question_answer_string3",0),
-            ud.get("question_answer_string4",0),
-        ]
-    })
-
-    c_left, c_right = st.columns(2)
-    with c_left:
-        st.subheader("Patient Anticipated Pain/Difficulty")
-        _difficulty_chart(df_diff, "Numeric Rating Scale (NRS)")
-
-    with c_right:
-        st.subheader("Patient Personality Traits & Insights")
-        _bigfive_chart(ud)
-
-    st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-**Model reasoning (example):**  
-Based on age, activity level, and absence of major disabilities, squats are likely manageable.
-Toe-touch stretch may feel harder due to flexibility constraints.
-        """)
-    with col2:
-        st.markdown("""
-**Trait glossary (quick):**  
-- **Extroversion**: Sociability and energy  
-- **Agreeableness**: Cooperation and empathy  
-- **Conscientiousness**: Discipline and reliability  
-- **Emotional Stability**: Calmness and resilience  
-- **Openness**: Curiosity and novelty seeking  
-        """)
-
-# =========================
-#          MAIN
-# =========================
-def main():
-    # Sidebar: navigation + settings
-    pages = ["Mentalytics Overview", "My Health Profile", "Patient Corner", "Physio Corner"]
-    choice = st.sidebar.radio("Navigation", pages)
-
-    with st.sidebar.expander("⚙️ Settings", expanded=False):
-        bin_path = st.text_input("llama-cli path", value=DEFAULT_BIN_PATH)
-        model_path = st.text_input(".gguf model path", value=DEFAULT_MODEL_PATH)
-        max_tokens = st.slider("Max tokens", min_value=64, max_value=2048, value=DEFAULT_MAX_TOKENS, step=64)
-        threads    = st.slider("Threads", min_value=1, max_value=max(1, multiprocessing.cpu_count()), value=DEFAULT_THREADS, step=1)
-        batch      = st.slider("Batch size", min_value=16, max_value=4096, value=DEFAULT_BATCH, step=16)
-        no_warmup  = st.checkbox("Disable warmup (faster start)", value=DEFAULT_NOWARMUP)
-        temperature = st.slider("Temperature", 0.0, 1.5, DEFAULT_TEMPERATURE, 0.05)
-        top_p       = st.slider("Top-p", 0.1, 1.0, DEFAULT_TOP_P, 0.05)
-
-    # Global banner
-    st.markdown("<h1 class='center'>🧠 AMM Mobile App</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='center'>Local prototype – nothing leaves your machine</p>", unsafe_allow_html=True)
-
-    if choice == "Mentalytics Overview":
-        page_overview()
-    elif choice == "My Health Profile":
-        page_health_profile()
-    elif choice == "Patient Corner":
-        page_patient_corner(
-            bin_path=bin_path,
-            model_path=model_path,
-            max_tokens=max_tokens,
-            threads=threads,
-            batch=batch,
-            no_warmup=no_warmup,
-            temperature=temperature,
-            top_p=top_p,
-        )
-    elif choice == "Physio Corner":
-        page_physio_corner()
+        if st.button(f"🇬🇧 {t('lang_en')}", use_container_width=True):
+            st.session_state.lang = "en"
+            st.session_state.step = "consent"
+            st.rerun()
 
     st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
+
+
+def page_consent():
+    header("consent_title")
+    st.write(t("consent_intro"))
+
+
+    with st.expander("Study Information / Studieninformation / Informations d’étude", expanded=False):
+        st.markdown("""
+**Informed Consent of Participation**
+
+You are invited to participate in the field study **Mentalytics Field Study – Unity Day 2025** initiated and conducted
+by Prajvi Saxena. The research is supervised by Dr.-Ing. Sabine Janzen. This study is funded and financed by the
+research project BMFTR.
+
+Please note:
+- Your participation is entirely voluntary and can be withdrawn at any time.
+- The field study will last approximately **5–7 min**.
+- We will record personal demographics (age, gender, etc.).
+- All records and data will be subject to standard data use policies.
+- Repeated participation in the study is not permitted.
+
+The alternative to participation in this study is to choose not to participate. If you have any questions or complaints
+about the whole informed-consent process of this research study or your rights as a human research subject, please contact
+our ethical committee office (DFKI) and Dr.-Ing. Sabine Janzen (E-mail: **sabine.janzen@dfki.de**).
+You should carefully read the information below. Please take the time you need to read the consent form.
+
+---
+
+### 1. Purpose and Goal of this Research
+The purpose of this study is to test whether the Mentalytics system can accurately predict perceived exertion and task
+completion during a short, supervised exercise in a real-world festival setting. The goal is to evaluate the feasibility,
+safety, and reliability of on-device (edge) deployment for future use in digital health and rehabilitation support. Your
+participation will help us achieve this goal. The results of this research may be presented at scientific or professional
+meetings or published in scientific proceedings and journals.
+
+### 2. Participation and Compensation
+Your participation in this field study is completely voluntary. You will be one of approximately 200 people being surveyed
+for this research. You will receive no compensation for your participation. You may withdraw and discontinue participation
+at any time without penalty. If you decline to participate or withdraw from the field study, no one on the campus will be
+told. You can still demand a certificate of participation.
+
+### 3. Procedure
+After confirming the informed consent, the procedure is as follows:
+1. Participants complete a short safety triage with yes/no questions to rule out acute health risks.  
+2. Participants then enter basic demographic information (age group, sex, activity level) and rate their expected exertion on a **1–5 scale**.  
+3. They perform the exercise under supervision, with staff ensuring safety and observing task completion.  
+4. Immediately afterwards, participants rate their actual exertion, indicate whether they completed the task, and answer short usability and trust questions.  
+5. In parallel, staff record an observed ground truth for task completion according to predefined rules.  
+6. Finally, all data are stored locally in anonymized, encrypted form on the booth computer, with no cloud services used.
+
+The complete procedure of this field study will last approximately **5–7 min**.
+
+### 4. Risks and Benefits
+There are no risks associated with this field study. Discomforts or inconveniences will be minor and are not likely to happen.
+If any discomforts become a problem, you may discontinue your participation. In order to minimize any risk of infection,
+hygiene regulations of the DFKI apply and must be followed. Any violations of the hygiene regulations or house rules of this
+institution can mean immediate termination of the study. If you get injured as a direct result of participation in this
+research, please reach out to the principal investigator. Enrolled students are automatically insured against the consequences
+of accidents through statutory accident insurance and with private liability insurance in case of any damages. You will not
+directly benefit through participation in this field study. We hope that the information obtained from your participation may
+help to bring forward the research in this field. The confirmation of participation in this study can be obtained directly
+from the researchers.
+
+### 5. Data Protection and Confidentiality
+We are planning to publish our results from this and other sessions in scientific articles or other media. These publications
+will neither include your name nor can be associated with your identity. Any demographic information will be published
+anonymized and in aggregated form. Contact details (such as e-mails) can be used to track potential infection chains or to
+send you further details about the research. Your contact details will not be passed on to other third parties.
+
+Any data or information obtained in this field study will be treated confidentially, will be saved encrypted, and cannot be
+viewed by anyone outside this research project unless we have you sign a separate permission form allowing us to use them.
+All data you provide in this field study will be subject to the General Data Protection Regulation (GDPR) of the European
+Union (EU) and treated in compliance with the GDPR. Faculty and administrators from the campus will not have access to raw
+data or transcripts. This precaution will prevent your individual comments from having any negative repercussions. During
+the study, we log experimental data, and take notes during the field study. Raw data and material will be retained securely
+and in compliance with the GDPR, for no longer than required by the funding organization (**10 years**) or if you contact
+the researchers to destroy or delete them immediately. As with any publication or online-related activity, the risk of a
+breach of confidentiality or anonymity is always possible. According to the GDPR, the researchers will inform the participant
+if a breach of confidential data was detected.
+
+### 6. Identification of Investigators (Contact)
+- **Prajvi Saxena**, Student Researcher — prajvi.saxena@dfki.de  
+- **Dr.-Ing. Sabine Janzen**, Principal Investigator — Trippstadter Str. 122, 67663 Kaiserslautern, Germany — sabine.janzen@dfki.de  
+- **Prof. Dr.-Ing. Wolfgang Maaß**, Head of Department — Trippstadter Str. 122, 67663 Kaiserslautern, Germany
+
+### 7. Informed Consent and Agreement
+This consent form will be retained securely and in compliance with the GDPR for no longer than necessary.
+""")
+
+    # --- Two required checkboxes (must both be True) ---
+    agree_info = st.checkbox("I understand the explanation provided to me. I understand and will follow the hygiene rules of the institution. I understand that this declaration of consent is revocable at any time. I have been given a copy of this form. I have had all my questions answered to my satisfaction, and I voluntarily agree to participate in this field study.")
+    agree_data = st.checkbox("I agree that the researchers will and take notes during the field study. I understand that all data will be treated confidentially and in compliance with the GDPR. I understand that the material will be anonymized and cannot be associated with my name. I understand that full anonymity cannot be guaranteed and a breach of confidentiality is always possible. From the consent of publication, I cannot derive any rights (such as any explicit acknowledgment, financial benefit, or co-authorship). I understand that the material can be published worldwide and may be the subject of a press release linked to social media or other promotional activities. Before publication, I can revoke my consent at any time. Once the material has been committed to publication it will not be possible to revoke the consent.")
+
+    can_continue = agree_info and agree_data
+
+
+    col1, col2 = st.columns([1,1])
+    with col1:
+        if st.button(t("continue"), disabled=not can_continue, use_container_width=True):
+            payload = {
+                "agreed_info": bool(agree_info),
+                "agreed_data": bool(agree_data),
+                "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
+                "lang": st.session_state.lang,
+            }
+            save_json(DEVICE_ID, "consent", payload)
+            st.session_state.step = "intro"
+            st.rerun()
+    with col2:
+        export_device_zip_notice()
+
+
+    st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
+
+
+def page_intro():
+    header("intro_title")
+    st.write(t("intro_body"))
+
+    # German explainer + photos
+    st.markdown("<hr class='soft'/>", unsafe_allow_html=True)
+    st.subheader(t("de_blurb_title"))
+    st.write(t("de_blurb"))
+
+    img1 = find_asset(
+        "assets/physio1.jpg", "assets/physio1.jpg",
+        "/mnt/data/6e2d1f05-aecb-4ab1-b170-33132d9ed6cb.png"
+    )
+    img2 = find_asset(
+        "assets/physio2.jpg", "assets/physio2.jpg",
+        "/mnt/data/f0a2cd48-3600-4f18-a262-6e64ccd42b1b.png"
+    )
+    c1, c2 = st.columns(2)
+    with c1:
+        if img1: st.image(img1, use_container_width=True)
+    with c2:
+        if img2: st.image(img2, use_container_width=True)
+
+    st.caption("Note: a short exercise video will be embedded here (Prajvi to provide).")
+
+    st.write("")
+    if st.button(t("start_study"), use_container_width=True):
+        st.session_state.step = "survey"
+        st.rerun()
+    st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
+
+
+# ------- STUDY QUESTIONS (Google Form content, compact for mobile) -------
+def page_study_questions():
+    header("study_title")
+
+    with st.form("study_form"):
+        st.markdown("### Demographics")
+        age = st.selectbox(t("age"), [str(i) for i in range(1, 101)])
+        gender = st.radio("Gender (Biological)", ["Male", "Female"])
+        marital = st.radio("What is your marital status?",
+                           ["Single","Married","Divorced","Widowed","Prefer not to answer"])
+
+        st.markdown("### Health & Accessibility")
+        disability = st.radio("Disability Status", ["Yes","No","Prefer not to answer"])
+        sleep_hours = st.radio("How many hours do you sleep per day on average?",
+                               ["4–5 Hours","5–6 Hours","6–7 Hours","7–8 Hours","8–9 Hours","Less than 4 Hours","More than 9 Hours"])
+        sleep_problem = st.radio("Have you had any problems falling asleep or staying asleep lately?", ["Yes","No"])
+
+        st.markdown("### Employment")
+        employment = st.radio("Employment status",
+                              ["Employed","Unemployed","Student","Retired","Unable to work due to disability","Homemaker/caregiver"])
+        industry = st.selectbox("If employed, in which industry do you primarily work?",
+                                ["Healthcare and social assistance","Education","Professional/business services","Retail trade",
+                                 "Manufacturing","Construction","Transportation/warehousing","Food service/accommodation",
+                                 "Government/public administration","Information technology","Finance/insurance","Other (please specify)"])
+        work_type = st.selectbox("Which best describes your primary work activities?",
+                                 ["Office/desk work","Standing service work (retail, reception)","Skilled manual work (trades, repair)",
+                                  "Physical labor (construction, warehouse)","Driving/transportation","Public safety/emergency services","Other"])
+
+        st.markdown("### Psychological Well-Being and Emotional State")
+        emotional = st.radio("What is your current emotional state?",
+                             ["Happy","Calm","Neutral","Anxious","Frustrated","Sad","Stressed"])
+        stress = st.selectbox("What do you think about your stress level in your daily life?",
+                              ["Low","Moderate","High"])
+
+        st.markdown("### Physical Activity and Lifestyle Habits")
+        activities = st.multiselect("What types of physical activities do you participate in?",
+                                    ["Cardio/Aerobic exercise","Strength/Resistance training","Flexibility/Stretching",
+                                     "Sports (team or individual)","Recreational activities","Dance/Movement",
+                                     "Outdoor activities","Water activities","I don't participate in physical activities","Other (please specify)"])
+        days = st.radio("How many days per week do you engage in physical activity or exercise?",
+                        ["1–2 Days","2–3 Days","3–4 Days","4–5 Days","5–6 Days","7 Days"])
+        session_len = st.radio("On average, how long is each physical activity session?",
+                               ["Under 30 minutes","30–60 minutes","1–2 hours","More than 2 hours"])
+        mood_link = st.radio("How do you associate your mental health with your exercise habits?",
+                             ["I exercise more when I am happy","I exercise more when I am sad",
+                              "My exercise habits are not significantly influenced by my mood."])
+
+        st.markdown("### Health status & history")
+        overall_health = st.radio("How would you rate your overall health status?", ["1","2","3","4","5"])
+        mobility = st.radio("How would you rate your current mobility?", ["1","2","3","4","5"])
+        surgery = st.radio("Have you undergone any surgical procedure?", ["Yes","No"])
+        recovery = st.radio("How long was your recovery period ?",
+                            ["Under 2 weeks","2–4 weeks","1–3 months","3–6 months","6–12 months","Over 1 year","Ongoing recovery"])
+        pt_after = st.radio("Did you undergo physical therapy after your surgery?", ["Yes","No"])
+        pt_adherence = st.radio("Did you adhere to your prescribed physical therapy plan?", ["1","2","3","4","5"])
+
+        st.markdown("### Core Personality Dimensions (1–7)")
+        scale7 = ["1","2","3","4","5","6","7"]
+        big5 = {}
+        big5["extrav"] = st.radio("I see myself as Extraverted and Enthusiastic", scale7, horizontal=True)
+        big5["quarrel"] = st.radio("I see myself as critical and quarrelsome", scale7, horizontal=True)
+        big5["discipline"] = st.radio("I see myself as dependable and self-disciplined", scale7, horizontal=True)
+        big5["anxious"] = st.radio("I see myself as anxious and easily upset", scale7, horizontal=True)
+        big5["open"] = st.radio("I see myself as open to new experiences and complex", scale7, horizontal=True)
+        big5["quiet"] = st.radio("I see myself as reserved and quiet", scale7, horizontal=True)
+        big5["warm"] = st.radio("I see myself as sympathetic and warm", scale7, horizontal=True)
+        big5["careless"] = st.radio("I see myself as disorganized and careless", scale7, horizontal=True)
+        big5["stable"] = st.radio("I see myself as calm and emotionally stable", scale7, horizontal=True)
+        big5["uncreative"] = st.radio("I see myself as conventional, uncreative", scale7, horizontal=True)
+
+        submitted = st.form_submit_button(t("save_and_continue"))
+        if submitted:
+            survey = {
+                "lang": st.session_state.lang,
+                "device_id": DEVICE_ID,
+                "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
+                "age": age, "gender_bio": gender, "marital": marital,
+                "disability": disability, "sleep_hours": sleep_hours, "sleep_problem": sleep_problem,
+                "employment": employment, "industry": industry, "work_type": work_type,
+                "emotional": emotional, "stress": stress,
+                "activities": activities, "days_per_week": days, "session_length": session_len, "mood_link": mood_link,
+                "overall_health": overall_health, "mobility": mobility, "surgery": surgery,
+                "recovery": recovery, "pt_after": pt_after, "pt_adherence": pt_adherence,
+                "big5": big5,
+            }
+            save_json(DEVICE_ID, "survey", survey)
+            st.success(t("saved"))
+            st.session_state.step = "guidance"
+            st.rerun()
+
+
+def page_guidance():
+    header("guidance_title")
+
+    ud = load_json(DEVICE_ID, "survey")
+    if not ud:
+        st.info("No study answers found yet. Please complete the questions first.")
+        if st.button(t("back")):
+            st.session_state.step = "survey"; st.rerun()
+        return
+
+    st.subheader("Participant Snapshot")
+    cols = st.columns(2)
+    with cols[0]:
+        st.write(f"**{t('age')}**: {ud.get('age','—')}")
+        st.write(f"**Gender**: {ud.get('gender_bio','—')}")
+        st.write(f"**Employment**: {ud.get('employment','—')}")
+        st.write(f"**Industry**: {ud.get('industry','—')}")
+        st.write(f"**Activities**: {', '.join(ud.get('activities', [])) or '—'}")
+    with cols[1]:
+        st.write(f"**Emotion**: {ud.get('emotional','—')}")
+        st.write(f"**Stress**: {ud.get('stress','—')}")
+        st.write(f"**Overall health**: {ud.get('overall_health','—')}/5")
+        st.write(f"**Mobility**: {ud.get('mobility','—')}/5")
+        st.write(f"**Surgery/PT**: {ud.get('surgery','—')} / PT: {ud.get('pt_after','—')}")
+
+    st.markdown("---")
+    c_left, c_right = st.columns(2)
+    with c_left:
+        st.subheader(t("anticipated"))
+        df_diff = pd.DataFrame({
+            "Exercise": ["Sit-ups (30s)", "Toe Touch", "Squats", "Calf Raises"],
+            "NumericScore": [3, 3, 3, 3],  # placeholder
+        })
+        if ALTAIR_AVAILABLE:
+            score_map = {1:"1 - Not difficult",2:"2 - Slightly difficult",3:"3 - Moderately difficult",
+                         4:"4 - Very difficult",5:"5 - Extremely difficult"}
+            df = df_diff.copy()
+            df["ScoreLabel"] = df["NumericScore"].map(score_map)
+            chart = (
+                alt.Chart(df)
+                .mark_bar(size=32)
+                .encode(
+                    x=alt.X("Exercise:O", sort=None, axis=alt.Axis(labelAngle=0)),
+                    y=alt.Y("NumericScore:Q", title=t("nrs")),
+                    color=alt.Color("ScoreLabel:N", legend=alt.Legend(title="Difficulty Level"),
+                                    sort=list(score_map.values()))
+                ).properties(height=260)
+            )
+            st.altair_chart(chart, use_container_width=True)
+        else:
+            st.bar_chart(df_diff.set_index("Exercise")["NumericScore"])
+    with c_right:
+        st.subheader(t("traits"))
+        fake_ud = {
+            "Extroversion": int(ud.get("big5", {}).get("extrav", "4")),
+            "Agreeableness": int(ud.get("big5", {}).get("warm", "5")),
+            "Conscientiousness": int(ud.get("big5", {}).get("discipline", "5")),
+            "Emotional_Stability": int(ud.get("big5", {}).get("stable", "4")),
+            "Openness": int(ud.get("big5", {}).get("open", "5")),
+        }
+        # mini chart
+        data = []
+        norms = {"Extroversion":4.4, "Agreeableness":5.2, "Conscientiousness":5.4, "Emotional_Stability":4.8, "Openness":5.4}
+        for k,v in fake_ud.items():
+            data += [{"Trait":k,"Group":"User","Score":v},{"Trait":k,"Group":"Norm","Score":norms[k]}]
+        df = pd.DataFrame(data)
+        if ALTAIR_AVAILABLE:
+            chart = (
+                alt.Chart(df)
+                .mark_bar()
+                .encode(x=alt.X("Trait:N", axis=alt.Axis(labelAngle=0), title=None),
+                        y=alt.Y("Score:Q", scale=alt.Scale(domain=[0,7]), title="Score (out of 7)"),
+                        xOffset="Group:N", color="Group:N")
+                .properties(height=300)
+            )
+            st.altair_chart(chart, use_container_width=True)
+        else:
+            st.bar_chart(df.pivot(index="Trait", columns="Group", values="Score"))
+
+    st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
+
+
+# -----------------
+#  MAIN ROUTER
+# -----------------
+def main():
+    step = st.session_state.step
+
+    if step == "welcome":
+        page_welcome()
+    elif step == "consent":
+        page_consent()
+    elif step == "intro":
+        page_intro()
+    elif step == "survey":
+        page_study_questions()
+    elif step == "guidance":
+        page_guidance()
+    else:
+        st.session_state.step = "welcome"
+        st.rerun()
+
 
 if __name__ == "__main__":
     main()

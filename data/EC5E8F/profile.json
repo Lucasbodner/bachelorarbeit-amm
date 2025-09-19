@@ -1,0 +1,21 @@
+{
+  "Age": 30,
+  "Gender": "Female",
+  "Employment_status": "Employed",
+  "Current_emotional_state": "Calm",
+  "Have_any_physical_disabilities": "Nein",
+  "Type_of_physical_activities": [],
+  "How_many_days_do_you_do_exercise": 3,
+  "Overall_health_status": "Good",
+  "Current_mobility": "Good",
+  "Age_idx": 20,
+  "Gender_idx": 0,
+  "Employment_idx": 0,
+  "Emotion_idx": 0,
+  "Disability_idx": 0,
+  "Days_idx": 3,
+  "Overall_idx": 2,
+  "Mobility_idx": 2,
+  "Activities_list": [],
+  "lang": "de"
+}
