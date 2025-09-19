@@ -1,21 +1,22 @@
-# 🧠 Bachelorarbeit – AMM Mobile App
+# 🧠 Bachelorarbeit – AMM Mobile App (Mentalytics Prototype)
 
-This project is part of my Bachelor's thesis at **DFKI** and **HTW Saar**.  
-It demonstrates a **privacy-preserving prototype** that integrates an **Artificial Mental Model (AMM)** for healthcare support, running fully **locally** with no internet connection.
+This repository contains the **prototype application** developed as part of my **Bachelor’s Thesis** at **DFKI** and **HTW Saar**.  
+It demonstrates a **privacy-preserving, offline-first mobile web app** that integrates an **Artificial Mental Model (AMM)** for healthcare support.
+
+Built with **Streamlit**, the app is fully responsive (desktop & mobile), supports **multi-language UI (EN/DE/FR)**, and stores all data **locally on-device**.
 
 ---
 
 ## 📚 Table of Contents
 
 - [Project Description](#-project-description)  
-- [Project Structure](#-project-structure)  
-- [About the AMM](#-about-the-amm)  
-- [Privacy & Offline Functionality](#-privacy--offline-functionality)  
-- [Installation & Usage](#-installation--usage)  
-- [Model Parameters](#-model-parameters)  
-- [Features](#-features)  
+- [Key Features](#-key-features)  
+- [Privacy & Offline Design](#-privacy--offline-design)  
+- [User Flow](#-user-flow)  
 - [UI Pages](#-ui-pages)  
-- [Current Status](#-current-status)  
+- [Project Structure](#-project-structure)  
+- [Installation & Usage](#-installation--usage)  
+- [Future Work](#-future-work)  
 - [Author](#-author)  
 - [Timeline](#-timeline)  
 
@@ -23,14 +24,81 @@ It demonstrates a **privacy-preserving prototype** that integrates an **Artifici
 
 ## 📜 Project Description
 
-The goal is to build a **local, lightweight prototype** of an AMM-powered app for healthcare professionals and patients.  
-It uses **Streamlit** as a cross-platform interface (desktop & mobile web-friendly).  
+The goal is to design and implement a **lightweight mobile web application** for pilot studies,  
+integrating an **Artificial Mental Model (AMM)** as a digital companion for physiotherapy and rehabilitation.
 
-Core objectives:
-- Run **local inference** with a quantized `.gguf` model via `llama.cpp`.  
-- Provide a **multi-page UI**: Overview, Health Profile, Patient Q/A, and Physio Dashboard.  
-- Save **conversations locally** (JSONL format).  
-- Ensure strict **privacy**: nothing leaves the device.  
+The application:
+- Runs on **any local device** (smartphones, tablets, laptops) via a browser.  
+- Provides a **step-by-step flow** from language choice → consent → study survey → patient profile → physio dashboard.  
+- Ensures strict **data privacy** by storing all participant data **locally only**.  
+- Uses **Streamlit** for UI and **Altair** for visual analytics.  
+
+---
+
+## ✨ Key Features
+
+- 🌐 **Multi-language UI** (English, German, French).  
+- 📝 **Consent page** with full **Informed Consent form** integrated.  
+- 📊 **Survey questions** (demographics, health, lifestyle, personality traits).  
+- 📱 **Mobile-first layout** (single-column, responsive, large buttons).  
+- 💾 **Local storage per device** (unique device IDs, JSON files).  
+- 📤 **Data export**: bundle consent + survey + profile into a downloadable JSON.  
+- 📈 **Charts & Insights**:  
+  - Anticipated difficulty ratings (bar charts).  
+  - Personality traits vs. norms (Big Five radar-style comparison).  
+- 🔒 **Privacy-first**: no cloud, no tracking, no internet required.  
+
+---
+
+## 🔐 Privacy & Offline Design
+
+- All data (consent forms, survey answers, profiles) are stored **locally** in the `data/` folder, separated per device ID.  
+- No internet connection required: everything works **offline**.  
+- Exports are provided as `.json` bundles for local analysis.  
+- Designed for **pilot studies** at festivals, workshops, or clinics with multiple mobile devices.  
+
+---
+
+## 🚀 User Flow
+
+1. **Welcome** → User selects language (EN/DE/FR).  
+2. **Consent** → Full informed consent form + two required checkboxes.  
+3. **Intro** → Short explanation of the study, German explainer text + images.  
+4. **Survey** → Multi-section questionnaire: demographics, health, habits, emotions, Big Five traits.  
+5. **Guidance Dashboard** →  
+   - Snapshot of participant profile.  
+   - Charts: anticipated difficulty + personality traits comparison.  
+   - Export button for local data.  
+
+---
+
+## 📱 UI Pages
+
+1. **Welcome Page**  
+   - Title, intro text, and 3 language buttons.  
+
+2. **Consent Page**  
+   - Integrated **full informed consent** text.  
+   - Two checkboxes required before continuing.  
+   - Export data option.  
+
+3. **Intro Page**  
+   - Short explainer.  
+   - Embedded German description (for booth visitors).  
+   - Images illustrating physiotherapy context.  
+   - "Start the Study" button.  
+
+4. **Survey Page (Study Questions)**  
+   - Compact, mobile-friendly forms.  
+   - Sections: demographics, health & lifestyle, psychological state, Big Five.  
+   - One **Save & Continue** button at the bottom.  
+
+5. **Guidance Page (Dashboard)**  
+   - Participant snapshot.  
+   - **Charts**:  
+     - Exercise difficulty ratings (NRS).  
+     - Big Five traits vs. population norms.  
+   - Local export.  
 
 ---
 
@@ -38,140 +106,54 @@ Core objectives:
 
 ```
 bachelorarbeit-amm/
-├── app.py                   # Main Streamlit application (UI + llama.cpp integration)
-├── requirements.txt         # Dependencies
-├── README.md                # Project description & setup
-
-├── model/                   # Quantized AMM model (.gguf)
-│   └── Llama-3.2-1B-merged-lora-q4_k.gguf
-├── bin/                     # llama-cli binary
-│   └── llama-cli
-├── utils/                   
-│   └── storage.py           # Save/load/export conversations
-├── data/                    
-│   └── conversations.jsonl  # Conversation history (auto-created)
-├── doc/                     # Notes, articles, diagrams, screenshots
-├── assets/                  # Logos & images for UI
+├── app.py                   # Main Streamlit app (UI + flow)
+├── requirements.txt         # Python dependencies
+├── README.md                # Documentation
+├── data/                    # Local storage (per device, auto-created)
+├── assets/                  # Images, logos
+├── doc/                     # Notes, screenshots, thesis materials
 ```
-
----
-
-## 🧠 About the AMM
-
-- **Artificial Mental Model (AMM):** a concept to capture patient expectations and support therapy decisions.  
-- Based on **LLaMA in `.gguf` format**, executed with **llama.cpp** (`llama-cli`).  
-- Fully **offline**, ensuring medical data privacy.  
-- Provides **personalized, explainable answers** and **visual insights** into patient traits and progress.  
-
----
-
-## 🔐 Privacy & Offline Functionality
-
-- **All inference and storage happen locally**.  
-- No API calls, no cloud servers, no data transmission.  
-- History is stored in `data/conversations.jsonl`.  
-- Future extension: add **optional encryption** for stored data.  
 
 ---
 
 ## ⚙️ Installation & Usage
 
 ### 1. Clone the repository
-
 ```bash
 git clone https://github.com/lucasbodner/bachelorarbeit-amm.git
 cd bachelorarbeit-amm
 ```
 
 ### 2. Install dependencies
-
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Place the model
-
-Copy your quantized `.gguf` model into the `model/` folder:
-
-```
-model/Llama-3.2-1B-merged-lora-q4_k.gguf
-```
-
-### 4. Make sure the llama-cli binary is executable
-
-```bash
-chmod +x bin/llama-cli
-```
-
-### 5. Run the app
-
+### 3. Run the app
 ```bash
 streamlit run app.py
 ```
 
-The app will open at [http://localhost:8501](http://localhost:8501).  
-👉 Accessible via desktop browser and **mobile browser (same Wi-Fi/local network)**.
+Open [http://localhost:8501](http://localhost:8501) in a browser.  
+👉 Works on both desktop and mobile devices (same Wi-Fi/local network).
 
 ---
 
-## 🔧 Model Parameters
+## 🔮 Future Work
 
-Configurable in `app.py`:
-
-```python
-DEFAULT_MAX_TOKENS = "800"   # length of generation
-DEFAULT_THREADS    = "6"     # number of CPU threads
-DEFAULT_BATCH      = "1024"  # batch size
-DEFAULT_NOWARMUP   = True    # skip warmup for faster start
-```
-
-Example command run internally:
-
-```bash
-llama-cli -m model/Llama-3.2-1B-merged-lora-q4_k.gguf   -p "How can AI support physiotherapy?"   -n 800 -t 6 -b 1024 --no-warmup
-```
-
----
-
-## ✨ Features
-
-- **Local inference** via `llama.cpp` with `.gguf` models.  
-- **Multi-page UI** (Overview, Health Profile, Patient Q/A, Physio Corner).  
-- **Mobile-friendly design** (responsive Streamlit layout).  
-- **Conversation history** saved locally (JSONL).  
-- **Export & clear** conversation history.  
-- **Charts & insights** (Altair/Streamlit).  
-- **Robust error handling**:  
-  - Missing model/binary → clear error message.  
-  - Empty input → warning.  
-  - Runtime logs viewable in debug expander.  
-
----
-
-## 📱 UI Pages
-
-1. **Overview** – Project context, AMM concept, privacy approach.  
-2. **My Health Profile** – Patient demographics, health status, Big Five traits, exercise difficulty.  
-3. **Patient Corner** – Q/A with the AMM, local chat history, export/clear options.  
-4. **Physio Corner** – Patient profile summary, difficulty scores (chart), personality traits vs. norms (chart).  
-
----
-
-## ✅ Current Status
-
-- ✅ Local prototype fully functional.  
-- ✅ Responsive UI tested on desktop and mobile browsers.  
-- ✅ Conversation history with export/clear.  
-- ✅ Charts (Altair with fallback).  
-- 🟡 Documentation & screenshots in progress.  
-- 🔒 Encryption planned as future work.  
+- Integration with **llama.cpp** for local AMM inference.  
+- Embedding **short exercise videos** on the intro page.  
+- Extended **charting and visualization** (time-series, longitudinal data).  
+- Optional **data encryption** for export files.  
+- Improved **survey logic** (conditional questions).  
 
 ---
 
 ## 👨‍💼 Author
 
 **Lucas Bodner**  
-Bachelor student at **HTW Saar** / Intern at **DFKI**  
+Bachelor Student – **HTW Saar**  
+Intern – **DFKI Smart Services**  
 📧 lucas.bodner@htwsaar.de  
 
 ---
@@ -181,10 +163,11 @@ Bachelor student at **HTW Saar** / Intern at **DFKI**
 | Week | Task                                    | Status     |
 |------|-----------------------------------------|------------|
 | S1–S2 | Planning, literature review             | ✅ Done     |
-| S3    | Project setup, base UI (FedWell)        | ✅ Done     |
-| S4    | Model integration (llama.cpp)           | ✅ Done     |
-| S5    | UI improvements & cleanup               | ✅ Done     |
-| S6    | Local storage, export/clear functions   | ✅ Done     |
-| S7    | Full testing, demo preparation          | ✅ Done     |
-| S8    | Documentation, screenshots              | ✅ Done     |
-| S9–S12 | Thesis writing & finalization          | 🟡 Ongoing  |
+| S3    | Initial Streamlit setup (multi-lang)    | ✅ Done     |
+| S4    | Consent form integration                | ✅ Done     |
+| S5    | Full survey implementation              | ✅ Done     |
+| S6    | Local storage & export                  | ✅ Done     |
+| S7    | Guidance dashboard + charts             | ✅ Done     |
+| S8    | Testing & UI refinements                | ✅ Done     |
+| S9–S10 | Documentation & screenshots            | ✅ Done     |
+| S11–S12 | Thesis writing & final submission      | 🟡 Ongoing  |
