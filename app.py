@@ -120,7 +120,6 @@ div[data-baseweb="select"] > div { border-radius:12px; }
 }
 hr.soft{ border:none; height:1px; background:var(--border); margin:12px 0;}
 
-/* ===== Checkboxes bien noirs ===== */
 div[data-testid="stCheckbox"] label {
   color: var(--fg) !important;
   opacity: 1 !important;
@@ -138,7 +137,6 @@ div[data-testid="stCheckbox"] div[role="checkbox"] + div {
 }
 div[data-testid="stCheckbox"] { opacity: 1 !important; }
 
-/* --- Boutons désactivés visibles --- */
 .stButton > button:disabled,
 [data-testid="baseButton-primary"][disabled] {
   background: #e2e8f0 !important;
@@ -149,7 +147,6 @@ div[data-testid="stCheckbox"] { opacity: 1 !important; }
   cursor: not-allowed !important;
 }
 
-/* --- st.download_button lisible (ghost) --- */
 .stDownloadButton > button {
   background: var(--brand-ghost) !important;
   color: var(--brand) !important;
@@ -164,7 +161,6 @@ div[data-testid="stCheckbox"] { opacity: 1 !important; }
   transform: translateY(-1px);
 }
 
-/* Forcer le texte des boutons primaires en blanc */
 .stButton > button { color: #fff !important; }
 
 /* === Radios : forcer le texte des réponses en noir === */
@@ -176,7 +172,6 @@ div[data-testid="stRadio"] div[role="radiogroup"] p {
   font-weight: 500;
 }
 
-/* Le label principal des radios */
 div[data-testid="stRadio"] > label {
   color: var(--muted) !important;
   font-weight: 600;
@@ -199,15 +194,11 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "consent_checkbox": "I have read the study information and I agree to participate.",
         "consent_checkbox2": "I consent to the storage and local processing of my answers as described.",
         "continue": "Continue",
-        "intro_title": "Before we begin",
-        "intro_body": "This pilot will ask a few questions about you and your health. It should take about 5–7 minutes.",
-        "start_study": "Start the study",
         "profile_title": "Quick Profile",
         "save_locally": "Save locally",
         "saved": "Saved locally.",
         "next": "Next",
         "back": "Back",
-        "guidance_title": "Guidance",
         "device": "Device",
         "age": "Age",
         "gender": "Gender",
@@ -220,12 +211,12 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "mobility": "Current mobility",
         "yes": "Yes", "no": "No",
         "required_note": "Please complete all fields to continue.",
-        "anticipated": "Patient Anticipated Pain/Difficulty",
+        "anticipated": "Predicted Pain/Difficulty",
         "nrs": "Numeric Rating Scale (NRS)",
-        "traits": "Patient Personality Traits & Insights",
+        "traits": "Personality Traits & Insights",
         "study_title": "Study Questions",
         "save_and_continue": "Save & Continue",
-        "de_blurb_title": "Mentalytics: Wenn die KI weiß, wie du dich fühlst",
+        "de_blurb_title": "Mentalytics: When AI knows how you feel",
         "de_blurb": (
             "Hands-on AI: Mentalytics is an AI assistant for rehabilitation and training. "
             "It uses artificial mental models, takes expectations, fitness and mood into account – "
@@ -234,18 +225,6 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         ),
         # --- Guidance page labels (EN) ---
         "participant_snapshot": "Participant Snapshot",
-        "industry": "Industry",
-        "stress": "Stress",
-        "surgery": "Surgery",
-        "pt": "PT",
-        "surgery_pt": "Surgery/PT",
-        "difficulty_level": "Difficulty Level",
-        "score_word": "Score",
-        "level": "Level",
-        "score_out_of_7": "Score (out of 7)",
-        "group": "Group",
-        "group_user": "User",
-        "group_norm": "Norm",
 
         # Exercises
         "ex_situps": "Sit-ups (30s)",
@@ -445,15 +424,11 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "consent_checkbox": "Ich habe die Studieninformation gelesen und stimme der Teilnahme zu.",
         "consent_checkbox2": "Ich willige in die lokale Speicherung und Verarbeitung meiner Antworten ein.",
         "continue": "Weiter",
-        "intro_title": "Bevor wir starten",
-        "intro_body": "Dieses Pilot fragt ein paar Dinge zu Ihnen und Ihrer Gesundheit (ca. 5–7 Minuten).",
-        "start_study": "Studie starten",
         "profile_title": "Kurzprofil",
         "save_locally": "Lokal speichern",
         "saved": "Lokal gespeichert.",
         "next": "Weiter",
         "back": "Zurück",
-        "guidance_title": "Leitfaden",
         "device": "Gerät",
         "age": "Alter",
         "gender": "Geschlecht",
@@ -658,15 +633,11 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "consent_checkbox": "J’ai lu les informations et j’accepte de participer.",
         "consent_checkbox2": "J’accepte l’enregistrement local et le traitement décrit de mes réponses.",
         "continue": "Continuer",
-        "intro_title": "Avant de commencer",
-        "intro_body": "Ce pilote pose quelques questions sur vous et votre santé (environ 5–7 minutes).",
-        "start_study": "Commencer l’étude",
         "profile_title": "Profil rapide",
         "save_locally": "Enregistrer en local",
         "saved": "Enregistré en local.",
         "next": "Suivant",
         "back": "Retour",
-        "guidance_title": "Conseils",
         "device": "Appareil",
         "age": "Âge",
         "gender": "Genre",
@@ -679,12 +650,12 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "mobility": "Mobilité actuelle",
         "yes": "Oui", "no": "Non",
         "required_note": "Veuillez compléter tous les champs pour continuer.",
-        "anticipated": "Douleur / difficulté anticipée",
+        "anticipated": "Douleur / difficulté prédites",
         "nrs": "Échelle numérique (NRS)",
-        "traits": "Traits de personnalité & insights",
+        "traits": "Traits de personnalité & aperçus",
         "study_title": "Questions d’étude",
         "save_and_continue": "Enregistrer et continuer",
-        "de_blurb_title": "Mentalytics : Quand l’IA lit dans vos pensées",
+        "de_blurb_title": "Mentalytics : Quand l'IA sait ce que vous ressentez",
         "de_blurb": (
             "L'IA à portée de main : Mentalytics est un assistant IA pour la rééducation et l’entraînement. "
             "Il s’appuie sur des modèles mentaux artificiels, prend en compte attentes, forme et humeur – "
@@ -868,7 +839,7 @@ STRINGS: Dict[str, Dict[str, Any]] = {
 if "lang" not in st.session_state:
     st.session_state.lang = "en"
 
-# Step machine: welcome → consent → intro → survey → guidance
+# Step machine: welcome → consent → survey → guidance
 if "step" not in st.session_state:
     st.session_state.step = "welcome"
 
@@ -964,6 +935,18 @@ def page_welcome():
             st.session_state.lang = "en"
             st.session_state.step = "consent"
             st.rerun()
+            
+    st.markdown("<hr class='soft'/>", unsafe_allow_html=True)
+    st.subheader(t("de_blurb_title"))
+    st.write(t("de_blurb"))
+
+    img = find_asset(
+        "assets/physio2.jpg",
+        "/mnt/data/379fbb7c-b263-4f19-8e5c-e06e0be28db2.png",
+        "/mnt/data/6e2d1f05-aecb-4ab1-b170-33132d9ed6cb.png"  
+    )
+    if img:
+        st.image(img, use_container_width=True)
 
     st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
 
@@ -988,41 +971,9 @@ def page_consent():
             "lang": st.session_state.lang,
         }
         save_json(DEVICE_ID, "consent", payload)
-        st.session_state.step = "intro"
-        st.rerun()
-
-    st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
-
-
-def page_intro():
-    header("intro_title")
-    st.write(t("intro_body"))
-
-    # German explainer + photos
-    st.markdown("<hr class='soft'/>", unsafe_allow_html=True)
-    st.subheader(t("de_blurb_title"))
-    st.write(t("de_blurb"))
-
-    img1 = find_asset(
-        "assets/physio1.jpg", "assets/physio1.jpg",
-        "/mnt/data/6e2d1f05-aecb-4ab1-b170-33132d9ed6cb.png"
-    )
-    img2 = find_asset(
-        "assets/physio2.jpg", "assets/physio2.jpg",
-        "/mnt/data/f0a2cd48-3600-4f18-a262-6e64ccd42b1b.png"
-    )
-    c1, c2 = st.columns(2)
-    with c1:
-        if img1: st.image(img1, use_container_width=True)
-    with c2:
-        if img2: st.image(img2, use_container_width=True)
-
-    st.caption("Note: a short exercise video will be embedded here (Prajvi to provide).")
-
-    st.write("")
-    if st.button(t("start_study"), use_container_width=True):
         st.session_state.step = "survey"
         st.rerun()
+
     st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
 
 
@@ -1064,20 +1015,25 @@ def page_study_questions():
         pt_after = st.radio(qs("pt_after_q"), qs("yn_opts")[:2])
         pt_adherence = st.radio(qs("pt_adherence_q"), ["1","2","3","4","5"])
 
+        # --- BIG FIVE (dropdowns 1–7) ---
         st.markdown(f"### {qs('sec_big5')}")
-        scale7 = ["1","2","3","4","5","6","7"]
-        big5 = {}
+        scale7 = [str(i) for i in range(1, 8)]
         b5 = STRINGS[st.session_state.lang]["survey"]["big5"]
-        big5["extrav"] = st.radio(b5["extrav"], scale7, horizontal=True)
-        big5["quarrel"] = st.radio(b5["quarrel"], scale7, horizontal=True)
-        big5["discipline"] = st.radio(b5["discipline"], scale7, horizontal=True)
-        big5["anxious"] = st.radio(b5["anxious"], scale7, horizontal=True)
-        big5["open"] = st.radio(b5["open"], scale7, horizontal=True)
-        big5["quiet"] = st.radio(b5["quiet"], scale7, horizontal=True)
-        big5["warm"] = st.radio(b5["warm"], scale7, horizontal=True)
-        big5["careless"] = st.radio(b5["careless"], scale7, horizontal=True)
-        big5["stable"] = st.radio(b5["stable"], scale7, horizontal=True)
-        big5["uncreative"] = st.radio(b5["uncreative"], scale7, horizontal=True)
+
+        def big5_select(label: str, default: int = 4) -> str:
+            return st.selectbox(label, scale7, index=default-1)
+
+        big5 = {}
+        big5["extrav"]     = big5_select(b5["extrav"], default=4)
+        big5["quarrel"]    = big5_select(b5["quarrel"], default=3)
+        big5["discipline"] = big5_select(b5["discipline"], default=5)
+        big5["anxious"]    = big5_select(b5["anxious"], default=3)
+        big5["open"]       = big5_select(b5["open"], default=5)
+        big5["quiet"]      = big5_select(b5["quiet"], default=4)
+        big5["warm"]       = big5_select(b5["warm"], default=5)
+        big5["careless"]   = big5_select(b5["careless"], default=3)
+        big5["stable"]     = big5_select(b5["stable"], default=4)
+        big5["uncreative"] = big5_select(b5["uncreative"], default=3)
 
         submitted = st.form_submit_button(t("save_and_continue"), type="primary")
         if submitted:
@@ -1101,7 +1057,6 @@ def page_study_questions():
 
 
 def page_guidance():
-    header("guidance_title")
 
     ud = load_json(DEVICE_ID, "survey")
     if not ud:
@@ -1110,35 +1065,14 @@ def page_guidance():
             st.session_state.step = "survey"; st.rerun()
         return
 
-    # ---- Snapshot card ----
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader(t("participant_snapshot"))
-    cols = st.columns(2)
-    with cols[0]:
-        st.write(f"**{t('age')}**: {ud.get('age','—')}")
-        st.write(f"**{t('gender')}**: {ud.get('gender_bio','—')}")
-        st.write(f"**{t('employment')}**: {ud.get('employment','—')}")
-        st.write(f"**{t('industry')}**: {ud.get('industry','—')}")
-        st.write(f"**{t('activities')}**: {', '.join(ud.get('activities', [])) or '—'}")
-    with cols[1]:
-        st.write(f"**{t('emotion')}**: {ud.get('emotional','—')}")
-        st.write(f"**{t('stress')}**: {ud.get('stress','—')}")
-        st.write(f"**{t('overall_health')}**: {ud.get('overall_health','—')}/5")
-        st.write(f"**{t('mobility')}**: {ud.get('mobility','—')}/5")
-        st.write(f"**{t('surgery_pt')}**: {ud.get('surgery','—')} / {t('pt')}: {ud.get('pt_after','—')}")
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.write("")
 
     c_left, c_right = st.columns(2)
 
-    # ---- Chart 1 : Anticipated difficulty ----
+    # ---- Chart 1 : Predicted pain/difficulty (horizontal) ----
     with c_left:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader(t("anticipated"))
 
-        # c) Noms d’exercices + légende difficulté (localisés)
         df_diff = pd.DataFrame({
             "Exercise": [t("ex_situps"), t("ex_toe_touch"), t("ex_squats"), t("ex_calf_raises")],
             "NumericScore": [3, 3, 3, 3],
@@ -1149,36 +1083,45 @@ def page_guidance():
             df = df_diff.copy()
             df["ScoreLabel"] = df["NumericScore"].map(score_map)
 
-            base = (
-                alt.Chart(df)
-                .properties(height=280, padding={"left":10,"right":10,"top":10,"bottom":10})
-                .configure(background="white")
-                .configure_view(stroke=None)
-                .configure_axis(grid=True, gridColor="#e2e8f0", labelColor="#0f172a", titleColor="#0f172a")
+            base = alt.Chart(df).properties(height=280)
+
+            bars = (
+                base.mark_bar(size=30, cornerRadiusTopLeft=6, cornerRadiusBottomLeft=6, opacity=0.95)
+                .encode(
+                    y=alt.Y("Exercise:O", sort=None, axis=alt.Axis(title=None)),
+                    x=alt.X("NumericScore:Q",
+                            title=t("nrs"),
+                            scale=alt.Scale(domain=[0, 5], nice=False, zero=True),
+                            axis=alt.Axis(tickMinStep=1)),
+                    color=alt.value("#2563eb"),
+                    tooltip=[alt.Tooltip("Exercise:N"),
+                             alt.Tooltip("NumericScore:Q", title=t("score_word"))],
+                )
+            )
+
+            labels = (
+                base.mark_text(dx=6, fontSize=12, align="left")
+                .encode(
+                    y=alt.Y("Exercise:O", sort=None),
+                    x=alt.X("NumericScore:Q"),
+                    text=alt.Text("ScoreLabel:N"),
+                )
             )
 
             chart = (
-                base.mark_bar(size=34, cornerRadiusTopLeft=8, cornerRadiusTopRight=8)
-                .encode(
-                    x=alt.X("Exercise:O", sort=None, axis=alt.Axis(labelAngle=0, title=None)),
-                    y=alt.Y("NumericScore:Q", title=t("nrs"), scale=alt.Scale(domain=[0,5])),
-                    color=alt.Color(
-                        "ScoreLabel:N",
-                        legend=alt.Legend(title=t("difficulty_level"), orient="top-right"),
-                        scale=alt.Scale(range=["#93c5fd","#60a5fa","#3b82f6","#2563eb","#1d4ed8"]),
-                    ),
-                    tooltip=[
-                        alt.Tooltip("Exercise:N"),
-                        alt.Tooltip("NumericScore:Q", title=t("score_word")),
-                        alt.Tooltip("ScoreLabel:N", title=t("level")),
-                    ],
-                )
+                alt.layer(bars, labels)
+                  .properties(padding={"left": 10, "right": 10, "top": 10, "bottom": 10})
+                  .configure(background="white")
+                  .configure_view(stroke=None)
+                  .configure_axis(grid=True, gridColor="#e2e8f0",
+                                  labelColor="#0f172a", titleColor="#0f172a")
             )
             st.altair_chart(chart, use_container_width=True)
         else:
-            st.bar_chart(df_diff.set_index("Exercise")["NumericScore"])
+            st.bar_chart(df_diff.set_index("Exercise").T)
 
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
     # ---- Chart 2 : Traits ----
@@ -1195,7 +1138,6 @@ def page_guidance():
         }
         norms = {"Extroversion":4.4, "Agreeableness":5.2, "Conscientiousness":5.4, "Emotional_Stability":4.8, "Openness":5.4}
 
-        # d) Mapping des libellés de traits localisés
         trait_labels = {
             "Extroversion": t("trait_ext"),
             "Agreeableness": t("trait_agr"),
@@ -1208,41 +1150,39 @@ def page_guidance():
         for k, v in fake_ud.items():
             tl = trait_labels[k]
             data += [
-                {"Trait": tl, "Group": t("group_user"), "Score": v},
                 {"Trait": tl, "Group": t("group_norm"), "Score": norms[k]},
+                {"Trait": tl, "Group": t("group_user"), "Score": v},
             ]
         df = pd.DataFrame(data)
 
         if ALTAIR_AVAILABLE:
-            base = (
-                alt.Chart(df)
-                .properties(height=300, padding={"left":10,"right":10,"top":10,"bottom":10})
-                .configure(background="white")
-                .configure_view(stroke=None)
-                .configure_axis(grid=True, gridColor="#e2e8f0", labelColor="#0f172a", titleColor="#0f172a")
-            )
+            base = alt.Chart(df).properties(height=300, padding={"left":10,"right":10,"top":10,"bottom":10})
 
             chart = (
                 base.mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
                 .encode(
                     x=alt.X("Trait:N", axis=alt.Axis(labelAngle=0, title=None)),
                     y=alt.Y("Score:Q", scale=alt.Scale(domain=[0,7]), title=t("score_out_of_7")),
-                    xOffset="Group:N",
+                    xOffset=alt.X("Group:N", sort=[t("group_norm"), t("group_user")]),
                     color=alt.Color(
                         "Group:N",
-                        legend=alt.Legend(title=t("group"), orient="top-right"),
-                        scale=alt.Scale(range=["#94a3b8","#2563eb"]),
+                        sort=[t("group_norm"), t("group_user")],
+                        legend=alt.Legend(title=t("group"), orient="bottom", columns=2),
+                        scale=alt.Scale(range=["#9ca3af", "#2563eb"]),
                     ),
                     tooltip=["Trait:N","Group:N","Score:Q"],
                 )
-            )
+            ).configure(background="white") \
+             .configure_view(stroke=None) \
+             .configure_axis(grid=True, gridColor="#e2e8f0",
+                             labelColor="#0f172a", titleColor="#0f172a")
+
             st.altair_chart(chart, use_container_width=True)
         else:
             st.bar_chart(df.pivot(index="Trait", columns="Group", values="Score"))
 
+
         st.markdown("</div>", unsafe_allow_html=True)
-
-
 
 
 
@@ -1256,8 +1196,6 @@ def main():
         page_welcome()
     elif step == "consent":
         page_consent()
-    elif step == "intro":
-        page_intro()
     elif step == "survey":
         page_study_questions()
     elif step == "guidance":

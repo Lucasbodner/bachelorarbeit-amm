@@ -171,17 +171,16 @@ div[data-testid="stCheckbox"] { opacity: 1 !important; }
 div[data-testid="stRadio"] div[role="radiogroup"] label,
 div[data-testid="stRadio"] div[role="radiogroup"] span,
 div[data-testid="stRadio"] div[role="radiogroup"] p {
-  color: var(--fg) !important;   /* noir (fg) */
+  color: var(--fg) !important;
   opacity: 1 !important;
   font-weight: 500;
 }
 
-/* Le label principal (ex : "Gender (Biological)") peut rester gris */
+/* Le label principal des radios */
 div[data-testid="stRadio"] > label {
   color: var(--muted) !important;
   font-weight: 600;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -190,6 +189,7 @@ div[data-testid="stRadio"] > label {
 #  I18N STRINGS
 # -----------------
 STRINGS: Dict[str, Dict[str, Any]] = {
+    # ---------- EN ----------
     "en": {
         "app_title": "Mentalytics: When AI Reads Your Mind",
         "welcome_intro": "Welcome to our pilot study. Please choose your language to continue.",
@@ -199,9 +199,6 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "consent_checkbox": "I have read the study information and I agree to participate.",
         "consent_checkbox2": "I consent to the storage and local processing of my answers as described.",
         "continue": "Continue",
-        "intro_title": "Before we begin",
-        "intro_body": "This pilot will ask a few questions about you and your health. It should take about 5–7 minutes.",
-        "start_study": "Start the study",
         "profile_title": "Quick Profile",
         "save_locally": "Save locally",
         "saved": "Saved locally.",
@@ -209,8 +206,6 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "back": "Back",
         "guidance_title": "Guidance",
         "device": "Device",
-        "export": "Export data",
-        # Profile fields
         "age": "Age",
         "gender": "Gender",
         "employment": "Employment status",
@@ -222,22 +217,66 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "mobility": "Current mobility",
         "yes": "Yes", "no": "No",
         "required_note": "Please complete all fields to continue.",
-        # Chart area
         "anticipated": "Patient Anticipated Pain/Difficulty",
         "nrs": "Numeric Rating Scale (NRS)",
         "traits": "Patient Personality Traits & Insights",
-        # Study survey page
         "study_title": "Study Questions",
         "save_and_continue": "Save & Continue",
-        # German explainer
-        "de_blurb_title": "Mentalytics: Wenn die KI weiß, wie du dich fühlst",
+        "de_blurb_title": "Mentalytics: When AI knows how you feel",
         "de_blurb": (
-            "KI zum Anfassen: Mentalytics ist ein KI-Assistent für Rehabilitation und Training. "
-            "Er nutzt künstliche mentale Modelle, berücksichtigt Erwartungen, Fitness und Stimmung – "
-            "und sagt voraus, wie anstrengend eine Übung erlebt wird und ob sie gelingt. "
-            "Die KI schätzt dein Empfinden ein – **bevor** du loslegst. Du wirst überrascht sein, wie gut sie dich kennt."
+            "Hands-on AI: Mentalytics is an AI assistant for rehabilitation and training. "
+            "It uses artificial mental models, takes expectations, fitness and mood into account – "
+            "and predicts how strenuous an exercise will be and whether it will be successful. "
+            "The AI assesses how you feel – before you start. You'll be surprised how well it knows you."
         ),
-        # ---- Consent localized strings (EN) ----
+        # --- Guidance page labels (EN) ---
+        "participant_snapshot": "Participant Snapshot",
+        "industry": "Industry",
+        "stress": "Stress",
+        "surgery": "Surgery",
+        "pt": "PT",
+        "surgery_pt": "Surgery/PT",
+        "difficulty_level": "Difficulty Level",
+        "score_word": "Score",
+        "level": "Level",
+        "score_out_of_7": "Score (out of 7)",
+        "group": "Group",
+        "group_user": "User",
+        "group_norm": "Norm",
+
+        # Exercises
+        "ex_situps": "Sit-ups (30s)",
+        "ex_toe_touch": "Toe Touch",
+        "ex_squats": "Squats",
+        "ex_calf_raises": "Calf Raises",
+
+        # Big Five labels for charts
+        "trait_ext": "Extroversion",
+        "trait_agr": "Agreeableness",
+        "trait_con": "Conscientiousness",
+        "trait_emo": "Emotional Stability",
+        "trait_ope": "Openness",
+
+        # Difficulty labels
+        "diff1": "1 - Not difficult",
+        "diff2": "2 - Slightly difficult",
+        "diff3": "3 - Moderately difficult",
+        "diff4": "4 - Very difficult",
+        "diff5": "5 - Extremely difficult",
+        
+        # Consent (EN)
+        "consent_info_header": "Study Information",
+        "consent_check1": ("I understand the explanation provided to me. I understand and will follow the hygiene rules of the "
+                           "institution. I understand that this declaration of consent is revocable at any time. I have been given "
+                           "a copy of this form. I have had all my questions answered to my satisfaction, and I voluntarily agree to participate in this field study."),
+        "consent_check2": ("I agree that the researchers will take notes during the field study. I understand that all data will be treated "
+                           "confidentially and in compliance with the GDPR. I understand that the material will be anonymized and cannot be "
+                           "associated with my name. I understand that full anonymity cannot be guaranteed and a breach of confidentiality is "
+                           "always possible. From the consent of publication, I cannot derive any rights (such as any explicit acknowledgment, "
+                           "financial benefit, or co-authorship). I understand that the material can be published worldwide and may be the subject "
+                           "of a press release linked to social media or other promotional activities. Before publication, I can revoke my consent "
+                           "at any time. Once the material has been committed to publication it will not be possible to revoke the consent."),
+                # ---- Consent localized strings (EN) ----
         "consent_info_header": "Study Information",
         "consent_check1": ("I understand the explanation provided to me. I understand and will follow the hygiene rules of the "
                            "institution. I understand that this declaration of consent is revocable at any time. I have been given "
@@ -250,99 +289,159 @@ STRINGS: Dict[str, Dict[str, Any]] = {
                            "of a press release linked to social media or other promotional activities. Before publication, I can revoke my consent "
                            "at any time. Once the material has been committed to publication it will not be possible to revoke the consent."),
         "consent_md": r"""
-**Informed Consent of Participation**
+        **Informed Consent of Participation**
 
-You are invited to participate in the field study **Mentalytics Field Study – Unity Day 2025** initiated and conducted
-by Prajvi Saxena. The research is supervised by Dr.-Ing. Sabine Janzen. This study is funded and financed by the
-research project BMFTR.
+        You are invited to participate in the field study **Mentalytics Field Study – Unity Day 2025** initiated and conducted
+        by Prajvi Saxena. The research is supervised by Dr.-Ing. Sabine Janzen. This study is funded and financed by the
+        research project BMFTR.
 
-Please note:
-- Your participation is entirely voluntary and can be withdrawn at any time.
-- The field study will last approximately **5–7 min**.
-- We will record personal demographics (age, gender, etc.).
-- All records and data will be subject to standard data use policies.
-- Repeated participation in the study is not permitted.
+        Please note:
+        - Your participation is entirely voluntary and can be withdrawn at any time.
+        - The field study will last approximately **5–7 min**.
+        - We will record personal demographics (age, gender, etc.).
+        - All records and data will be subject to standard data use policies.
+        - Repeated participation in the study is not permitted.
 
-The alternative to participation in this study is to choose not to participate. If you have any questions or complaints
-about the whole informed-consent process of this research study or your rights as a human research subject, please contact
-our ethical committee office (DFKI) and Dr.-Ing. Sabine Janzen (E-mail: **sabine.janzen@dfki.de**).
-You should carefully read the information below. Please take the time you need to read the consent form.
+        The alternative to participation in this study is to choose not to participate. If you have any questions or complaints
+        about the whole informed-consent process of this research study or your rights as a human research subject, please contact
+        our ethical committee office (DFKI) and Dr.-Ing. Sabine Janzen (E-mail: **sabine.janzen@dfki.de**).
+        You should carefully read the information below. Please take the time you need to read the consent form.
 
----
+        ---
 
-### 1. Purpose and Goal of this Research
-The purpose of this study is to test whether the Mentalytics system can accurately predict perceived exertion and task
-completion during a short, supervised exercise in a real-world festival setting. The goal is to evaluate the feasibility,
-safety, and reliability of on-device (edge) deployment for future use in digital health and rehabilitation support. Your
-participation will help us achieve this goal. The results of this research may be presented at scientific or professional
-meetings or published in scientific proceedings and journals.
+        ### 1. Purpose and Goal of this Research
+        The purpose of this study is to test whether the Mentalytics system can accurately predict perceived exertion and task
+        completion during a short, supervised exercise in a real-world festival setting. The goal is to evaluate the feasibility,
+        safety, and reliability of on-device (edge) deployment for future use in digital health and rehabilitation support. Your
+        participation will help us achieve this goal. The results of this research may be presented at scientific or professional
+        meetings or published in scientific proceedings and journals.
 
-### 2. Participation and Compensation
-Your participation in this field study is completely voluntary. You will be one of approximately 200 people being surveyed
-for this research. You will receive no compensation for your participation. You may withdraw and discontinue participation
-at any time without penalty. If you decline to participate or withdraw from the field study, no one on the campus will be
-told. You can still demand a certificate of participation.
+        ### 2. Participation and Compensation
+        Your participation in this field study is completely voluntary. You will be one of approximately 200 people being surveyed
+        for this research. You will receive no compensation for your participation. You may withdraw and discontinue participation
+        at any time without penalty. If you decline to participate or withdraw from the field study, no one on the campus will be
+        told. You can still demand a certificate of participation.
 
-### 3. Procedure
-After confirming the informed consent, the procedure is as follows:
-1. Participants complete a short safety triage with yes/no questions to rule out acute health risks.  
-2. Participants then enter basic demographic information (age group, sex, activity level) and rate their expected exertion on a **1–5 scale**.  
-3. They perform the exercise under supervision, with staff ensuring safety and observing task completion.  
-4. Immediately afterwards, participants rate their actual exertion, indicate whether they completed the task, and answer short usability and trust questions.  
-5. In parallel, staff record an observed ground truth for task completion according to predefined rules.  
-6. Finally, all data are stored locally in anonymized, encrypted form on the booth computer, with no cloud services used.
+        ### 3. Procedure
+        After confirming the informed consent, the procedure is as follows:
+        1. Participants complete a short safety triage with yes/no questions to rule out acute health risks.  
+        2. Participants then enter basic demographic information (age group, sex, activity level) and rate their expected exertion on a 1–5 scale.  
+        3. They perform the exercise under supervision, with staff ensuring safety and observing task completion.  
+        4. Immediately afterwards, participants rate their actual exertion, indicate whether they completed the task, and answer short usability and trust questions.  
+        5. In parallel, staff record an observed ground truth for task completion according to predefined rules.  
+        6. Finally, all data are stored locally in anonymized, encrypted form on the booth computer, with no cloud services used.
 
-The complete procedure of this field study will last approximately **5–7 min**.
+        The complete procedure of this field study will last approximately **5–7 min**.
 
-### 4. Risks and Benefits
-There are no risks associated with this field study. Discomforts or inconveniences will be minor and are not likely to happen.
-If any discomforts become a problem, you may discontinue your participation. In order to minimize any risk of infection,
-hygiene regulations of the DFKI apply and must be followed. Any violations of the hygiene regulations or house rules of this
-institution can mean immediate termination of the study. If you get injured as a direct result of participation in this
-research, please reach out to the principal investigator. Enrolled students are automatically insured against the consequences
-of accidents through statutory accident insurance and with private liability insurance in case of any damages. You will not
-directly benefit through participation in this field study. We hope that the information obtained from your participation may
-help to bring forward the research in this field. The confirmation of participation in this study can be obtained directly
-from the researchers.
+        ### 4. Risks and Benefits
+        There are no risks associated with this field study. Discomforts or inconveniences will be minor and are not likely to happen.
+        If any discomforts become a problem, you may discontinue your participation. In order to minimize any risk of infection,
+        hygiene regulations of the DFKI apply and must be followed. Any violations of the hygiene regulations or house rules of this
+        institution can mean immediate termination of the study. If you get injured as a direct result of participation in this
+        research, please reach out to the principal investigator. Enrolled students are automatically insured against the consequences
+        of accidents through statutory accident insurance and with private liability insurance in case of any damages. You will not
+        directly benefit through participation in this field study. We hope that the information obtained from your participation may
+        help to bring forward the research in this field. The confirmation of participation in this study can be obtained directly
+        from the researchers.
 
-### 5. Data Protection and Confidentiality
-We are planning to publish our results from this and other sessions in scientific articles or other media. These publications
-will neither include your name nor can be associated with your identity. Any demographic information will be published
-anonymized and in aggregated form. Contact details (such as e-mails) can be used to track potential infection chains or to
-send you further details about the research. Your contact details will not be passed on to other third parties.
+        ### 5. Data Protection and Confidentiality
+        We are planning to publish our results from this and other sessions in scientific articles or other media. These publications
+        will neither include your name nor can be associated with your identity. Any demographic information will be published
+        anonymized and in aggregated form. Contact details (such as e-mails) can be used to track potential infection chains or to
+        send you further details about the research. Your contact details will not be passed on to other third parties.
 
-Any data or information obtained in this field study will be treated confidentially, will be saved encrypted, and cannot be
-viewed by anyone outside this research project unless we have you sign a separate permission form allowing us to use them.
-All data you provide in this field study will be subject to the General Data Protection Regulation (GDPR) of the European
-Union (EU) and treated in compliance with the GDPR. Faculty and administrators from the campus will not have access to raw
-data or transcripts. This precaution will prevent your individual comments from having any negative repercussions. During
-the study, we log experimental data, and take notes during the field study. Raw data and material will be retained securely
-and in compliance with the GDPR, for no longer than required by the funding organization (**10 years**) or if you contact
-the researchers to destroy or delete them immediately. As with any publication or online-related activity, the risk of a
-breach of confidentiality or anonymity is always possible. According to the GDPR, the researchers will inform the participant
-if a breach of confidential data was detected.
+        Any data or information obtained in this field study will be treated confidentially, will be saved encrypted, and cannot be
+        viewed by anyone outside this research project unless we have you sign a separate permission form allowing us to use them.
+        All data you provide in this field study will be subject to the General Data Protection Regulation (GDPR) of the European
+        Union (EU) and treated in compliance with the GDPR. Faculty and administrators from the campus will not have access to raw
+        data or transcripts. This precaution will prevent your individual comments from having any negative repercussions. During
+        the study, we log experimental data, and take notes during the field study. Raw data and material will be retained securely
+        and in compliance with the GDPR, for no longer than required by the funding organization (10 years) or if you contact
+        the researchers to destroy or delete them immediately. As with any publication or online-related activity, the risk of a
+        breach of confidentiality or anonymity is always possible. According to the GDPR, the researchers will inform the participant
+        if a breach of confidential data was detected.
 
-### 6. Identification of Investigators (Contact)
-- **Prajvi Saxena**, Student Researcher — prajvi.saxena@dfki.de  
-- **Dr.-Ing. Sabine Janzen**, Principal Investigator — Trippstadter Str. 122, 67663 Kaiserslautern, Germany — sabine.janzen@dfki.de  
-- **Prof. Dr.-Ing. Wolfgang Maaß**, Head of Department — Trippstadter Str. 122, 67663 Kaiserslautern, Germany
+        ### 6. Identification of Investigators (Contact)
+        - **Prajvi Saxena**, Student Researcher — prajvi.saxena@dfki.de  
+        - **Dr.-Ing. Sabine Janzen**, Principal Investigator — Trippstadter Str. 122, 67663 Kaiserslautern, Germany — sabine.janzen@dfki.de  
+        - **Prof. Dr.-Ing. Wolfgang Maaß**, Head of Department — Trippstadter Str. 122, 67663 Kaiserslautern, Germany
 
-### 7. Informed Consent and Agreement
-This consent form will be retained securely and in compliance with the GDPR for no longer than necessary.
-"""
+        ### 7. Informed Consent and Agreement
+        This consent form will be retained securely and in compliance with the GDPR for no longer than necessary.
+        """,
+        
+        # ---- Survey (EN) ----
+        "survey": {
+            "sec_demo": "Demographics",
+            "gender_label": "Gender (Biological)",
+            "gender_opts": ["Male", "Female"],
+            "marital_q": "What is your marital status?",
+            "marital_opts": ["Single","Married","Divorced","Widowed","Prefer not to answer"],
+            "sec_health": "Health & Accessibility",
+            "disability_q": "Disability Status",
+            "yn_opts": ["Yes","No","Prefer not to answer"],
+            "sleep_hours_q": "How many hours do you sleep per day on average?",
+            "sleep_hours_opts": ["4–5 Hours","5–6 Hours","6–7 Hours","7–8 Hours","8–9 Hours","Less than 4 Hours","More than 9 Hours"],
+            "sleep_problem_q": "Have you had any problems falling asleep or staying asleep lately?",
+            "sec_employment": "Employment",
+            "employment_q": "Employment status",
+            "employment_opts": ["Employed","Unemployed","Student","Retired","Unable to work due to disability","Homemaker/caregiver"],
+            "industry_q": "If employed, in which industry do you primarily work?",
+            "industry_opts": ["Healthcare and social assistance","Education","Professional/business services","Retail trade",
+                              "Manufacturing","Construction","Transportation/warehousing","Food service/accommodation",
+                              "Government/public administration","Information technology","Finance/insurance","Other (please specify)"],
+            "work_type_q": "Which best describes your primary work activities?",
+            "work_type_opts": ["Office/desk work","Standing service work (retail, reception)","Skilled manual work (trades, repair)",
+                               "Physical labor (construction, warehouse)","Driving/transportation","Public safety/emergency services","Other"],
+            "sec_psych": "Psychological Well-Being and Emotional State",
+            "emotional_q": "What is your current emotional state?",
+            "emotional_opts": ["Happy","Calm","Neutral","Anxious","Frustrated","Sad","Stressed"],
+            "stress_q": "What do you think about your stress level in your daily life?",
+            "stress_opts": ["Low","Moderate","High"],
+            "sec_lifestyle": "Physical Activity and Lifestyle Habits",
+            "activities_q": "What types of physical activities do you participate in?",
+            "activities_opts": ["Cardio/Aerobic exercise","Strength/Resistance training","Flexibility/Stretching",
+                                "Sports (team or individual)","Recreational activities","Dance/Movement",
+                                "Outdoor activities","Water activities","I don't participate in physical activities","Other (please specify)"],
+            "days_q": "How many days per week do you engage in physical activity or exercise?",
+            "days_opts": ["1–2 Days","2–3 Days","3–4 Days","4–5 Days","5–6 Days","7 Days"],
+            "session_len_q": "On average, how long is each physical activity session?",
+            "session_len_opts": ["Under 30 minutes","30–60 minutes","1–2 hours","More than 2 hours"],
+            "mood_link_q": "How do you associate your mental health with your exercise habits?",
+            "mood_link_opts": ["I exercise more when I am happy","I exercise more when I am sad","My exercise habits are not significantly influenced by my mood."],
+            "sec_status": "Health status & history",
+            "overall_health_q": "How would you rate your overall health status?",
+            "mobility_q": "How would you rate your current mobility?",
+            "surgery_q": "Have you undergone any surgical procedure?",
+            "recovery_q": "How long was your recovery period ?",
+            "recovery_opts": ["Under 2 weeks","2–4 weeks","1–3 months","3–6 months","6–12 months","Over 1 year","Ongoing recovery"],
+            "pt_after_q": "Did you undergo physical therapy after your surgery?",
+            "pt_adherence_q": "Did you adhere to your prescribed physical therapy plan?",
+            "sec_big5": "Core Personality Dimensions (1–7)",
+            "big5": {
+                "extrav": "I see myself as Extraverted and Enthusiastic",
+                "quarrel": "I see myself as critical and quarrelsome",
+                "discipline": "I see myself as dependable and self-disciplined",
+                "anxious": "I see myself as anxious and easily upset",
+                "open": "I see myself as open to new experiences and complex",
+                "quiet": "I see myself as reserved and quiet",
+                "warm": "I see myself as sympathetic and warm",
+                "careless": "I see myself as disorganized and careless",
+                "stable": "I see myself as calm and emotionally stable",
+                "uncreative": "I see myself as conventional, uncreative"
+            }
+        },
     },
+    # ---------- DE ----------
     "de": {
         "app_title": "Mentalytics: Wenn die KI weiß, wie du dich fühlst",
-        "welcome_intro": "Willkommen zu unserer Pilotstudie. Bitte wähle deine Sprache aus, um fortzufahren.",
+        "welcome_intro": "Willkommen zu unserer Pilotstudie. Bitte wählen Sie eine Sprache aus, um fortzufahren.",
         "lang_fr": "Französisch", "lang_de": "Deutsch", "lang_en": "Englisch",
         "consent_title": "Einverständniserklärung",
-        "consent_intro": "Bitte lies die Infos unten. Kreuze beide Kästchen an, um fortzufahren.",
+        "consent_intro": "Bitte lesen Sie die Informationen unten. Kreuzen Sie beide Kästchen an, um fortzufahren.",
         "consent_checkbox": "Ich habe die Studieninformation gelesen und stimme der Teilnahme zu.",
         "consent_checkbox2": "Ich willige in die lokale Speicherung und Verarbeitung meiner Antworten ein.",
         "continue": "Weiter",
-        "intro_title": "Bevor wir starten",
-        "intro_body": "Dieses Pilot fragt ein paar Dinge zu dir und deiner Gesundheit (ca. 5–7 Minuten).",
-        "start_study": "Studie starten",
         "profile_title": "Kurzprofil",
         "save_locally": "Lokal speichern",
         "saved": "Lokal gespeichert.",
@@ -350,7 +449,6 @@ This consent form will be retained securely and in compliance with the GDPR for 
         "back": "Zurück",
         "guidance_title": "Leitfaden",
         "device": "Gerät",
-        "export": "Daten exportieren",
         "age": "Alter",
         "gender": "Geschlecht",
         "employment": "Beschäftigungsstatus",
@@ -372,10 +470,41 @@ This consent form will be retained securely and in compliance with the GDPR for 
             "KI zum Anfassen: Mentalytics ist ein KI-Assistent für Rehabilitation und Training. "
             "Er nutzt künstliche mentale Modelle, berücksichtigt Erwartungen, Fitness und Stimmung – "
             "und sagt voraus, wie anstrengend eine Übung erlebt wird und ob sie gelingt. "
-            "Die KI schätzt dein Empfinden ein – **bevor** du loslegst. Du wirst überrascht sein, wie gut sie dich kennt."
+            "Die KI schätzt dein Empfinden ein – bevor du loslegst. Du wirst überrascht sein, wie gut sie dich kennt."
         ),
-        # ---- Consent localized strings (DE) ----
-        "consent_info_header": "Studieninformation",
+        "participant_snapshot": "Teilnehmer-Snapshot",
+        "industry": "Branche",
+        "stress": "Stress",
+        "surgery": "Operation",
+        "pt": "Physiotherapie",
+        "surgery_pt": "Operation/Physiotherapie",
+        "difficulty_level": "Schwierigkeitsgrad",
+        "score_word": "Wert",
+        "level": "Stufe",
+        "score_out_of_7": "Wert (von 7)",
+        "group": "Gruppe",
+        "group_user": "Nutzer",
+        "group_norm": "Norm",
+
+        "ex_situps": "Sit-ups (30s)",
+        "ex_toe_touch": "Zehenspitzen berühren",
+        "ex_squats": "Kniebeugen",
+        "ex_calf_raises": "Wadenheben",
+
+        "trait_ext": "Extraversion",
+        "trait_agr": "Verträglichkeit",
+        "trait_con": "Gewissenhaftigkeit",
+        "trait_emo": "Emotionale Stabilität",
+        "trait_ope": "Offenheit",
+
+        "diff1": "1 - Nicht schwierig",
+        "diff2": "2 - Leicht schwierig",
+        "diff3": "3 - Mäßig schwierig",
+        "diff4": "4 - Sehr schwierig",
+        "diff5": "5 - Extrem schwierig",
+
+        # Consent (DE)
+                "consent_info_header": "Studieninformation",
         "consent_check1": ("Ich habe die Erläuterungen verstanden. Ich werde die Hygienevorschriften der Einrichtung einhalten. "
                            "Mir ist bewusst, dass ich diese Einwilligung jederzeit widerrufen kann. Ich habe eine Kopie dieses Formulars "
                            "erhalten. Meine Fragen wurden zu meiner Zufriedenheit beantwortet, und ich nehme freiwillig an dieser Feldstudie teil."),
@@ -387,71 +516,133 @@ This consent form will be retained securely and in compliance with the GDPR for 
                            "Vor der Veröffentlichung kann ich meine Einwilligung jederzeit widerrufen. Nach verbindlicher Einreichung zur Veröffentlichung ist ein "
                            "Widerruf nicht mehr möglich."),
         "consent_md": r"""
-**Einverständniserklärung**
+        **Einverständniserklärung**
 
-Sie sind eingeladen, an der Feldstudie **Mentalytics Field Study – Unity Day 2025** teilzunehmen, initiiert und durchgeführt
-von Prajvi Saxena, betreut von Dr.-Ing. Sabine Janzen. Die Studie wird durch das Forschungsprojekt BMFTR gefördert.
+        Sie sind eingeladen, an der Feldstudie **Mentalytics Field Study – Unity Day 2025** teilzunehmen, initiiert und durchgeführt
+        von Prajvi Saxena, betreut von Dr.-Ing. Sabine Janzen. Die Studie wird durch das Forschungsprojekt BMFTR gefördert.
 
-Bitte beachten:
-- Ihre Teilnahme ist freiwillig und kann jederzeit beendet werden.
-- Die Studie dauert ca. **5–7 Minuten**.
-- Es werden demografische Angaben (Alter, Geschlecht etc.) erfasst.
-- Alle Aufzeichnungen/Daten unterliegen den üblichen Nutzungsrichtlinien.
-- Mehrfache Teilnahmen sind nicht erlaubt.
+        Bitte beachten:
+        - Ihre Teilnahme ist freiwillig und kann jederzeit beendet werden.
+        - Die Studie dauert ca. **5–7 Minuten**.
+        - Es werden demografische Angaben (Alter, Geschlecht etc.) erfasst.
+        - Alle Aufzeichnungen/Daten unterliegen den üblichen Nutzungsrichtlinien.
+        - Mehrfache Teilnahmen sind nicht erlaubt.
 
-Anstelle der Teilnahme können Sie sich jederzeit dagegen entscheiden. Bei Fragen/Beschwerden zum Einwilligungsprozess oder
-zu Ihren Rechten wenden Sie sich an das Ethik-Büro des DFKI und Dr.-Ing. Sabine Janzen (E-Mail: **sabine.janzen@dfki.de**).
-Bitte lesen Sie die folgenden Informationen sorgfältig.
+        Anstelle der Teilnahme können Sie sich jederzeit dagegen entscheiden. Bei Fragen/Beschwerden zum Einwilligungsprozess oder
+        zu Ihren Rechten wenden Sie sich an das Ethik-Büro des DFKI und Dr.-Ing. Sabine Janzen (E-Mail: **sabine.janzen@dfki.de**).
+        Bitte lesen Sie die folgenden Informationen sorgfältig.
 
----
+        ---
 
-### 1. Zweck und Ziel der Forschung
-Untersucht wird, ob Mentalytics wahrgenommene Anstrengung und Aufgabenerfolg bei einer kurzen, betreuten Übung in einem
-realen Festivalkontext zuverlässig vorhersagen kann. Ziel ist die Bewertung von Machbarkeit, Sicherheit und Zuverlässigkeit
-eines **On-Device**-Einsatzes für zukünftige Anwendungen in Digital Health und Rehabilitation. Ihre Teilnahme unterstützt dieses Ziel.
-Ergebnisse können auf Tagungen präsentiert oder veröffentlicht werden.
+        ### 1. Zweck und Ziel der Forschung
+        Untersucht wird, ob Mentalytics wahrgenommene Anstrengung und Aufgabenerfolg bei einer kurzen, betreuten Übung in einem
+        realen Festivalkontext zuverlässig vorhersagen kann. Ziel ist die Bewertung von Machbarkeit, Sicherheit und Zuverlässigkeit
+        eines On-Device-Einsatzes für zukünftige Anwendungen in Digital Health und Rehabilitation. Ihre Teilnahme unterstützt dieses Ziel.
+        Ergebnisse können auf Tagungen präsentiert oder veröffentlicht werden.
 
-### 2. Teilnahme und Aufwandsentschädigung
-Die Teilnahme ist **freiwillig**. Etwa 200 Personen werden befragt. Es gibt **keine Vergütung**. Ein Rücktritt ist jederzeit
-**ohne Nachteile** möglich. Bei Ablehnung/Rücktritt wird niemand auf dem Campus informiert. Eine Teilnahmebestätigung kann ausgestellt werden.
+        ### 2. Teilnahme und Aufwandsentschädigung
+        Die Teilnahme ist freiwillig. Etwa 200 Personen werden befragt. Es gibt keine Vergütung. Ein Rücktritt ist jederzeit
+        ohne Nachteile möglich. Bei Ablehnung/Rücktritt wird niemand auf dem Campus informiert. Eine Teilnahmebestätigung kann ausgestellt werden.
 
-### 3. Ablauf
-Nach der Einwilligung:
-1. Kurzes Sicherheitsscreening (Ja/Nein).  
-2. Basisdaten + Bewertung der **erwarteten** Anstrengung (**1–5**).  
-3. Durchführung der Übung unter Aufsicht (Sicherheit + Beobachtung des Erfolgs).  
-4. Unmittelbar danach Bewertung der **tatsächlichen** Anstrengung, Angabe des Erfolgs, kurze Usability/Trust-Fragen.  
-5. Parallel dokumentiert das Team eine Ground-Truth nach vordefinierten Regeln.  
-6. Alle Daten werden **lokal**, anonymisiert und verschlüsselt gespeichert, **ohne** Cloud-Dienste.
+        ### 3. Ablauf
+        Nach der Einwilligung:
+        1. Kurzes Sicherheitsscreening (Ja/Nein).  
+        2. Basisdaten + Bewertung der erwarteten Anstrengung (1–5).  
+        3. Durchführung der Übung unter Aufsicht (Sicherheit + Beobachtung des Erfolgs).  
+        4. Unmittelbar danach Bewertung der tatsächlichen Anstrengung, Angabe des Erfolgs, kurze Usability/Trust-Fragen.  
+        5. Parallel dokumentiert das Team eine Ground-Truth nach vordefinierten Regeln.  
+        6. Alle Daten werden lokal, anonymisiert und verschlüsselt gespeichert, ohne Cloud-Dienste.
 
-Gesamtdauer: **5–7 Minuten**.
+        Gesamtdauer: **5–7 Minuten**.
 
-### 4. Risiken und Nutzen
-Es sind keine nennenswerten Risiken zu erwarten. Bei Unwohlsein können Sie abbrechen. Es gelten die Hygienevorschriften des DFKI;
-Verstöße können zum Abbruch führen. Bei Verletzungen infolge der Teilnahme wenden Sie sich an die Studienleitung.
-Eingeschriebene Studierende sind gesetzlich unfall- und haftpflichtversichert. Ein direkter Nutzen ist nicht zu erwarten,
-die Ergebnisse können jedoch die Forschung voranbringen. Eine Teilnahmebestätigung ist möglich.
+        ### 4. Risiken und Nutzen
+        Es sind keine nennenswerten Risiken zu erwarten. Bei Unwohlsein können Sie abbrechen. Es gelten die Hygienevorschriften des DFKI;
+        Verstöße können zum Abbruch führen. Bei Verletzungen infolge der Teilnahme wenden Sie sich an die Studienleitung.
+        Eingeschriebene Studierende sind gesetzlich unfall- und haftpflichtversichert. Ein direkter Nutzen ist nicht zu erwarten,
+        die Ergebnisse können jedoch die Forschung voranbringen. Eine Teilnahmebestätigung ist möglich.
 
-### 5. Datenschutz und Vertraulichkeit
-Veröffentlichte Ergebnisse enthalten keine personenbezogenen Daten. Demografische Angaben werden anonymisiert/aggregiert.
-Kontaktangaben (z. B. E-Mail) können zur Kontaktverfolgung oder für weiterführende Informationen genutzt, jedoch nicht an Dritte
-weitergegeben werden.
+        ### 5. Datenschutz und Vertraulichkeit
+        Veröffentlichte Ergebnisse enthalten keine personenbezogenen Daten. Demografische Angaben werden anonymisiert/aggregiert.
+        Kontaktangaben (z. B. E-Mail) können zur Kontaktverfolgung oder für weiterführende Informationen genutzt, jedoch nicht an Dritte
+        weitergegeben werden.
 
-Alle Daten werden vertraulich behandelt, **verschlüsselt** gespeichert und sind außerhalb des Projekts nicht einsehbar,
-sofern keine gesonderte Erlaubnis vorliegt. Die Verarbeitung erfolgt gemäß **DSGVO**. Verwaltung/Lehrende erhalten keinen
-Zugriff auf Rohdaten. Rohdaten/Material werden sicher und DSGVO-konform bis zur vom Förderer geforderten Dauer (**10 Jahre**)
-aufbewahrt oder auf Wunsch früher gelöscht. Wie bei allen Online-Aktivitäten bleibt ein Restrisiko für Datenschutzverletzungen.
-Im Falle eines Vorfalls werden Betroffene gemäß DSGVO informiert.
+        Alle Daten werden vertraulich behandelt, verschlüsselt gespeichert und sind außerhalb des Projekts nicht einsehbar,
+        sofern keine gesonderte Erlaubnis vorliegt. Die Verarbeitung erfolgt gemäß DSGVO. Verwaltung/Lehrende erhalten keinen
+        Zugriff auf Rohdaten. Rohdaten/Material werden sicher und DSGVO-konform bis zur vom Förderer geforderten Dauer (10 Jahre)
+        aufbewahrt oder auf Wunsch früher gelöscht. Wie bei allen Online-Aktivitäten bleibt ein Restrisiko für Datenschutzverletzungen.
+        Im Falle eines Vorfalls werden Betroffene gemäß DSGVO informiert.
 
-### 6. Kontakt
-- **Prajvi Saxena**, Studentische Forscherin — prajvi.saxena@dfki.de  
-- **Dr.-Ing. Sabine Janzen**, Studienleitung — Trippstadter Str. 122, 67663 Kaiserslautern — sabine.janzen@dfki.de  
-- **Prof. Dr.-Ing. Wolfgang Maaß**, Abteilungsleitung — Trippstadter Str. 122, 67663 Kaiserslautern
+        ### 6. Kontakt
+        - **Prajvi Saxena**, Studentische Forscherin — prajvi.saxena@dfki.de  
+        - **Dr.-Ing. Sabine Janzen**, Studienleitung — Trippstadter Str. 122, 67663 Kaiserslautern — sabine.janzen@dfki.de  
+        - **Prof. Dr.-Ing. Wolfgang Maaß**, Abteilungsleitung — Trippstadter Str. 122, 67663 Kaiserslautern
 
-### 7. Einwilligung
-Dieses Formular wird sicher und DSGVO-konform nur so lange wie nötig aufbewahrt.
-"""
+        ### 7. Einwilligung
+        Dieses Formular wird sicher und DSGVO-konform nur so lange wie nötig aufbewahrt.
+        """,
+        # ---- Survey (DE) ----
+        "survey": {
+            "sec_demo": "Demografie",
+            "gender_label": "Geschlecht (biologisch)",
+            "gender_opts": ["Männlich","Weiblich"],
+            "marital_q": "Wie ist dein Familienstand?",
+            "marital_opts": ["Ledig","Verheiratet","Geschieden","Verwitwet","Keine Angabe"],
+            "sec_health": "Gesundheit & Barrierefreiheit",
+            "disability_q": "Beeinträchtigung",
+            "yn_opts": ["Ja","Nein","Keine Angabe"],
+            "sleep_hours_q": "Wie viele Stunden schläfst du durchschnittlich pro Tag?",
+            "sleep_hours_opts": ["4–5 Stunden","5–6 Stunden","6–7 Stunden","7–8 Stunden","8–9 Stunden","Weniger als 4 Stunden","Mehr als 9 Stunden"],
+            "sleep_problem_q": "Hattest du zuletzt Einschlaf- oder Durchschlafprobleme?",
+            "sec_employment": "Beschäftigung",
+            "employment_q": "Beschäftigungsstatus",
+            "employment_opts": ["Beschäftigt","Arbeitslos","Student/in","Ruhestand","Arbeitsunfähig (Behinderung)","Haushalt/Pflege"],
+            "industry_q": "Falls beschäftigt: In welcher Branche arbeitest du hauptsächlich?",
+            "industry_opts": ["Gesundheits- & Sozialwesen","Bildung","Unternehmensnahe Dienste","Einzelhandel",
+                              "Verarbeitendes Gewerbe","Baugewerbe","Transport/Logistik","Gastronomie/Beherbergung",
+                              "Öffentliche Verwaltung","Informationstechnologie","Finanzen/Versicherungen","Andere (bitte angeben)"],
+            "work_type_q": "Welche Tätigkeit beschreibt deine Arbeit am besten?",
+            "work_type_opts": ["Büro/Schreibtischarbeit","Stehende Servicearbeit (z. B. Verkauf)","Qualifizierte Handarbeit (Handwerk, Reparatur)",
+                               "Körperliche Arbeit (Bau, Lager)","Fahren/Transport","Sicherheits-/Rettungsdienst","Sonstiges"],
+            "sec_psych": "Psychisches Wohlbefinden & Emotionen",
+            "emotional_q": "Wie ist dein aktueller Gefühlszustand?",
+            "emotional_opts": ["Glücklich","Gelassen","Neutral","Ängstlich","Frustriert","Traurig","Gestresst"],
+            "stress_q": "Wie schätzt du dein Stressniveau im Alltag ein?",
+            "stress_opts": ["Gering","Mittel","Hoch"],
+            "sec_lifestyle": "Körperliche Aktivität & Lebensstil",
+            "activities_q": "Welche Arten von körperlicher Aktivität machst du?",
+            "activities_opts": ["Cardio/Ausdauer","Kraft/Resistance-Training","Beweglichkeit/Dehnen",
+                                "Sport (Team/Einzeln)","Freizeitaktivitäten","Tanz/Bewegung",
+                                "Outdoor-Aktivitäten","Wasseraktivitäten","Ich mache keine körperliche Aktivität","Andere (bitte angeben)"],
+            "days_q": "An wie vielen Tagen pro Woche bist du körperlich aktiv?",
+            "days_opts": ["1–2 Tage","2–3 Tage","3–4 Tage","4–5 Tage","5–6 Tage","7 Tage"],
+            "session_len_q": "Wie lange dauert eine Einheit im Schnitt?",
+            "session_len_opts": ["Unter 30 Minuten","30–60 Minuten","1–2 Stunden","Mehr als 2 Stunden"],
+            "mood_link_q": "Wie beeinflusst deine Stimmung deinen Sport?",
+            "mood_link_opts": ["Ich trainiere mehr, wenn ich glücklich bin","Ich trainiere mehr, wenn ich traurig bin","Meine Aktivität hängt kaum von der Stimmung ab."],
+            "sec_status": "Gesundheitszustand & -historie",
+            "overall_health_q": "Wie bewertest du deinen allgemeinen Gesundheitszustand?",
+            "mobility_q": "Wie bewertest du deine aktuelle Mobilität?",
+            "surgery_q": "Hattest du eine Operation?",
+            "recovery_q": "Wie lange dauerte die Genesung?",
+            "recovery_opts": ["Unter 2 Wochen","2–4 Wochen","1–3 Monate","3–6 Monate","6–12 Monate","Über 1 Jahr","Laufende Genesung"],
+            "pt_after_q": "Hattest du danach Physiotherapie?",
+            "pt_adherence_q": "Hast du deinen Physio-Plan eingehalten?",
+            "sec_big5": "Kernpersönlichkeitsdimensionen (1–7)",
+            "big5": {
+                "extrav": "Ich sehe mich als extravertiert und enthusiastisch",
+                "quarrel": "Ich sehe mich als kritisch und streitlustig",
+                "discipline": "Ich sehe mich als zuverlässig und selbstdiszipliniert",
+                "anxious": "Ich sehe mich als ängstlich und leicht aufzuregen",
+                "open": "Ich sehe mich als offen für Neues und komplex",
+                "quiet": "Ich sehe mich als zurückhaltend und ruhig",
+                "warm": "Ich sehe mich als mitfühlend und warmherzig",
+                "careless": "Ich sehe mich als unorganisiert und nachlässig",
+                "stable": "Ich sehe mich als gelassen und emotional stabil",
+                "uncreative": "Ich sehe mich als konventionell, unkreativ"
+            }
+        },
     },
+    # ---------- FR ----------
     "fr": {
         "app_title": "Mentalytics : Quand l’IA lit dans vos pensées",
         "welcome_intro": "Bienvenue dans notre étude pilote. Veuillez choisir votre langue pour continuer.",
@@ -461,9 +652,6 @@ Dieses Formular wird sicher und DSGVO-konform nur so lange wie nötig aufbewahrt
         "consent_checkbox": "J’ai lu les informations et j’accepte de participer.",
         "consent_checkbox2": "J’accepte l’enregistrement local et le traitement décrit de mes réponses.",
         "continue": "Continuer",
-        "intro_title": "Avant de commencer",
-        "intro_body": "Ce pilote pose quelques questions sur vous et votre santé (environ 5–7 minutes).",
-        "start_study": "Commencer l’étude",
         "profile_title": "Profil rapide",
         "save_locally": "Enregistrer en local",
         "saved": "Enregistré en local.",
@@ -471,7 +659,6 @@ Dieses Formular wird sicher und DSGVO-konform nur so lange wie nötig aufbewahrt
         "back": "Retour",
         "guidance_title": "Conseils",
         "device": "Appareil",
-        "export": "Exporter les données",
         "age": "Âge",
         "gender": "Genre",
         "employment": "Statut professionnel",
@@ -488,14 +675,45 @@ Dieses Formular wird sicher und DSGVO-konform nur so lange wie nötig aufbewahrt
         "traits": "Traits de personnalité & insights",
         "study_title": "Questions d’étude",
         "save_and_continue": "Enregistrer et continuer",
-        "de_blurb_title": "Mentalytics : Quand l’IA lit dans vos pensées",
+        "de_blurb_title": "Mentalytics : Quand l'IA sait ce que vous ressentez",
         "de_blurb": (
-            "KI zum Anfassen : Mentalytics est un assistant IA pour la rééducation et l’entraînement. "
+            "L'IA à portée de main : Mentalytics est un assistant IA pour la rééducation et l’entraînement. "
             "Il s’appuie sur des modèles mentaux artificiels, prend en compte attentes, forme et humeur – "
-            "et prédit l’effort perçu et la réussite d’un exercice **avant** de commencer."
+            "et prédit l’effort perçu et la réussite d’un exercice avant de commencer."
         ),
-        # ---- Consent localized strings (FR) ----
-        "consent_info_header": "Informations d’étude",
+        "participant_snapshot": "Aperçu du participant",
+        "industry": "Secteur",
+        "stress": "Stress",
+        "surgery": "Chirurgie",
+        "pt": "Kinésithérapie",
+        "surgery_pt": "Chirurgie/Kiné",
+        "difficulty_level": "Niveau de difficulté",
+        "score_word": "Score",
+        "level": "Niveau",
+        "score_out_of_7": "Score (sur 7)",
+        "group": "Groupe",
+        "group_user": "Utilisateur",
+        "group_norm": "Norme",
+
+        "ex_situps": "Sit-ups (30 s)",
+        "ex_toe_touch": "Toucher des orteils",
+        "ex_squats": "Squats",
+        "ex_calf_raises": "Élévations mollets",
+
+        "trait_ext": "Extraversion",
+        "trait_agr": "Agréabilité",
+        "trait_con": "Conscience",
+        "trait_emo": "Stabilité émotionnelle",
+        "trait_ope": "Ouverture",
+
+        "diff1": "1 - Pas difficile",
+        "diff2": "2 - Légèrement difficile",
+        "diff3": "3 - Modérément difficile",
+        "diff4": "4 - Très difficile",
+        "diff5": "5 - Extrêmement difficile",
+
+        # Consent (FR)
+                "consent_info_header": "Informations d’étude",
         "consent_check1": ("J’ai compris l’explication qui m’a été fournie. Je respecterai les règles d’hygiène de l’institution. "
                            "Je comprends que ce consentement est révocable à tout moment. Une copie de ce formulaire m’a été remise. "
                            "Toutes mes questions ont reçu une réponse satisfaisante et j’accepte volontairement de participer à cette étude de terrain."),
@@ -507,72 +725,133 @@ Dieses Formular wird sicher und DSGVO-konform nur so lange wie nötig aufbewahrt
                            "promotionnelles. Avant publication, je peux révoquer mon consentement à tout moment. Une fois le matériel engagé pour publication, "
                            "il ne sera plus possible de révoquer le consentement."),
         "consent_md": r"""
-**Consentement éclairé à participer**
+        **Consentement éclairé à participer**
 
-Vous êtes invité(e) à participer à l’étude de terrain **Mentalytics Field Study – Unity Day 2025**, initiée et conduite
-par Prajvi Saxena, sous la supervision de la Dr-Ing. Sabine Janzen. Cette étude est financée par le projet de recherche BMFTR.
+        Vous êtes invité(e) à participer à l’étude de terrain **Mentalytics Field Study – Unity Day 2025**, initiée et conduite
+        par Prajvi Saxena, sous la supervision de la Dr-Ing. Sabine Janzen. Cette étude est financée par le projet de recherche BMFTR.
 
-À noter :
-- Votre participation est entièrement volontaire et peut être interrompue à tout moment.
-- La durée de l’étude est d’environ **5–7 minutes**.
-- Nous relevons des informations démographiques (âge, sexe, etc.).
-- Les enregistrements et données suivent les règles standard d’usage des données.
-- Les participations répétées ne sont pas autorisées.
+        À noter :
+        - Votre participation est entièrement volontaire et peut être interrompue à tout moment.
+        - La durée de l’étude est d’environ **5–7 minutes**.
+        - Nous relevons des informations démographiques (âge, sexe, etc.).
+        - Les enregistrements et données suivent les règles standard d’usage des données.
+        - Les participations répétées ne sont pas autorisées.
 
-L’alternative à la participation est de **ne pas** participer. Pour toute question concernant la procédure de consentement
-ou vos droits en tant que participant(e), contactez le comité d’éthique (DFKI) et la Dr-Ing. Sabine Janzen (e-mail : **sabine.janzen@dfki.de**).
-Veuillez lire attentivement les informations ci-dessous et prendre le temps nécessaire.
+        L’alternative à la participation est de ne pas participer. Pour toute question concernant la procédure de consentement
+        ou vos droits en tant que participant(e), contactez le comité d’éthique (DFKI) et la Dr-Ing. Sabine Janzen (e-mail : **sabine.janzen@dfki.de**).
+        Veuillez lire attentivement les informations ci-dessous et prendre le temps nécessaire.
 
----
+        ---
 
-### 1. Objet et but de la recherche
-L’étude vise à tester si le système Mentalytics peut prédire avec précision l’effort perçu et l’achèvement d’une tâche lors
-d’un court exercice supervisé dans un contexte réel (festival). L’objectif est d’évaluer la faisabilité, la sécurité et la
-fiabilité d’un déploiement **sur l’appareil** pour des usages futurs en e-santé et rééducation. Vos réponses contribueront à cet objectif.
-Les résultats pourront être présentés lors d’événements scientifiques ou publiés.
+        ### 1. Objet et but de la recherche
+        L’étude vise à tester si le système Mentalytics peut prédire avec précision l’effort perçu et l’achèvement d’une tâche lors
+        d’un court exercice supervisé dans un contexte réel (festival). L’objectif est d’évaluer la faisabilité, la sécurité et la
+        fiabilité d’un déploiement sur l’appareil pour des usages futurs en e-santé et rééducation. Vos réponses contribueront à cet objectif.
+        Les résultats pourront être présentés lors d’événements scientifiques ou publiés.
 
-### 2. Participation et compensation
-Votre participation est **volontaire**. Environ 200 personnes seront interrogées. Aucune compensation n’est prévue.
-Vous pouvez vous retirer **sans pénalité** à tout moment. En cas de refus/retrait, personne sur le campus n’en sera informé.
-Vous pouvez demander une attestation de participation.
+        ### 2. Participation et compensation
+        Votre participation est volontaire. Environ 200 personnes seront interrogées. Aucune compensation n’est prévue.
+        Vous pouvez vous retirer sans pénalité à tout moment. En cas de refus/retrait, personne sur le campus n’en sera informé.
+        Vous pouvez demander une attestation de participation.
 
-### 3. Déroulement
-Après le consentement :
-1. Triage rapide de sécurité (questions oui/non).  
-2. Données démographiques de base + évaluation de l’effort **anticipé** (échelle 1–5).  
-3. Exécution de l’exercice sous supervision (sécurité + observation de la réussite).  
-4. Évaluation de l’effort **réel**, réussite de la tâche, puis quelques questions d’utilisabilité et de confiance.  
-5. En parallèle, le personnel note la « vérité terrain » selon des règles prédéfinies.  
-6. Toutes les données sont stockées **localement** de façon anonymisée et chiffrée, **sans** services cloud.
+        ### 3. Déroulement
+        Après le consentement :
+        1. Triage rapide de sécurité (questions oui/non).  
+        2. Données démographiques de base + évaluation de l’effort anticipé (échelle 1–5).  
+        3. Exécution de l’exercice sous supervision (sécurité + observation de la réussite).  
+        4. Évaluation de l’effort réel, réussite de la tâche, puis quelques questions d’utilisabilité et de confiance.  
+        5. En parallèle, le personnel note la « vérité terrain » selon des règles prédéfinies.  
+        6. Toutes les données sont stockées localement de façon anonymisée et chiffrée, sans services cloud.
 
-Durée totale : **5–7 minutes**.
+        Durée totale : **5–7 minutes**.
 
-### 4. Risques et bénéfices
-Les risques sont minimes. En cas d’inconfort, vous pouvez arrêter. Les règles d’hygiène du DFKI s’appliquent ; toute infraction
-peut mener à l’arrêt immédiat de l’étude. En cas de blessure directe liée à l’étude, contactez l’investigatrice principale.
-Les étudiant(e)s inscrit(e)s sont couvert(e)s par l’assurance accidents et responsabilité civile. Aucun bénéfice direct n’est attendu,
-mais vos réponses peuvent faire progresser la recherche. Une attestation de participation peut être fournie.
+        ### 4. Risques et bénéfices
+        Les risques sont minimes. En cas d’inconfort, vous pouvez arrêter. Les règles d’hygiène du DFKI s’appliquent ; toute infraction
+        peut mener à l’arrêt immédiat de l’étude. En cas de blessure directe liée à l’étude, contactez l’investigatrice principale.
+        Les étudiant(e)s inscrit(e)s sont couvert(e)s par l’assurance accidents et responsabilité civile. Aucun bénéfice direct n’est attendu,
+        mais vos réponses peuvent faire progresser la recherche. Une attestation de participation peut être fournie.
 
-### 5. Protection des données et confidentialité
-Les résultats pourront être publiés sans aucune donnée permettant de vous identifier. Les informations démographiques
-seront anonymisées et agrégées. Les coordonnées (e-mail…) peuvent servir au traçage sanitaire ou à l’envoi d’informations
-complémentaires. Elles ne seront pas transmises à des tiers.
+        ### 5. Protection des données et confidentialité
+        Les résultats pourront être publiés sans aucune donnée permettant de vous identifier. Les informations démographiques
+        seront anonymisées et agrégées. Les coordonnées (e-mail…) peuvent servir au traçage sanitaire ou à l’envoi d’informations
+        complémentaires. Elles ne seront pas transmises à des tiers.
 
-Toutes les données seront traitées de manière confidentielle, **chiffrées** et **non accessibles** à des personnes extérieures
-au projet, sauf autorisation spécifique. Le traitement respecte le **RGPD**. Le personnel administratif du campus n’aura pas
-accès aux données brutes. Les données et matériels seront conservés en sécurité et conformément au RGPD pendant la durée
-requise par le financeur (**10 ans**) ou détruits plus tôt à votre demande. Comme pour toute activité en ligne, un risque
-résiduel de violation de la confidentialité ne peut être totalement exclu. Conformément au RGPD, toute violation détectée
-sera notifiée aux personnes concernées.
+        Toutes les données seront traitées de manière confidentielle, chiffrées et non accessibles à des personnes extérieures
+        au projet, sauf autorisation spécifique. Le traitement respecte le RGPD. Le personnel administratif du campus n’aura pas
+        accès aux données brutes. Les données et matériels seront conservés en sécurité et conformément au RGPD pendant la durée
+        requise par le financeur (10 ans) ou détruits plus tôt à votre demande. Comme pour toute activité en ligne, un risque
+        résiduel de violation de la confidentialité ne peut être totalement exclu. Conformément au RGPD, toute violation détectée
+        sera notifiée aux personnes concernées.
 
-### 6. Contacts
-- **Prajvi Saxena**, étudiante-chercheuse — prajvi.saxena@dfki.de  
-- **Dr-Ing. Sabine Janzen**, investigatrice principale — Trippstadter Str. 122, 67663 Kaiserslautern, Allemagne — sabine.janzen@dfki.de  
-- **Prof. Dr-Ing. Wolfgang Maaß**, directeur du département — Trippstadter Str. 122, 67663 Kaiserslautern, Allemagne
+        ### 6. Contacts
+        - **Prajvi Saxena**, étudiante-chercheuse — prajvi.saxena@dfki.de  
+        - **Dr-Ing. Sabine Janzen**, investigatrice principale — Trippstadter Str. 122, 67663 Kaiserslautern, Allemagne — sabine.janzen@dfki.de  
+        - **Prof. Dr-Ing. Wolfgang Maaß**, directeur du département — Trippstadter Str. 122, 67663 Kaiserslautern, Allemagne
 
-### 7. Consentement
-Ce formulaire sera conservé de manière sécurisée et conforme au RGPD pour la durée nécessaire.
-"""
+        ### 7. Consentement
+        Ce formulaire sera conservé de manière sécurisée et conforme au RGPD pour la durée nécessaire.
+        """,
+        # ---- Survey (FR) ----
+        "survey": {
+            "sec_demo": "Démographie",
+            "gender_label": "Genre (biologique)",
+            "gender_opts": ["Homme","Femme"],
+            "marital_q": "Quel est votre statut marital ?",
+            "marital_opts": ["Célibataire","Marié(e)","Divorcé(e)","Veuf/Veuve","Préférer ne pas répondre"],
+            "sec_health": "Santé & Accessibilité",
+            "disability_q": "Situation de handicap",
+            "yn_opts": ["Oui","Non","Préférer ne pas répondre"],
+            "sleep_hours_q": "Combien d’heures dormez-vous en moyenne par jour ?",
+            "sleep_hours_opts": ["4–5 heures","5–6 heures","6–7 heures","7–8 heures","8–9 heures","Moins de 4 heures","Plus de 9 heures"],
+            "sleep_problem_q": "Avez-vous récemment eu des difficultés d’endormissement ou de réveils nocturnes ?",
+            "sec_employment": "Emploi",
+            "employment_q": "Statut professionnel",
+            "employment_opts": ["En emploi","Sans emploi","Étudiant(e)","Retraité(e)","Incapacité de travailler (handicap)","Au foyer/aidant"],
+            "industry_q": "Si en emploi : dans quel secteur travaillez-vous principalement ?",
+            "industry_opts": ["Santé et action sociale","Éducation","Services aux entreprises/professionnels","Commerce de détail",
+                              "Industrie manufacturière","Construction","Transport/entreposage","Hôtellerie-restauration",
+                              "Administration publique","Technologies de l’information","Finance/assurance","Autre (à préciser)"],
+            "work_type_q": "Quelle description correspond le mieux à votre activité principale ?",
+            "work_type_opts": ["Travail de bureau","Service debout (vente, accueil)","Travail manuel qualifié (métiers, réparation)",
+                               "Travail physique (chantier, entrepôt)","Conduite/transport","Sécurité/services d’urgence","Autre"],
+            "sec_psych": "Bien-être psychologique & émotions",
+            "emotional_q": "Quel est votre état émotionnel actuel ?",
+            "emotional_opts": ["Heureux(se)","Calme","Neutre","Anxieux(se)","Frustré(e)","Triste","Stressé(e)"],
+            "stress_q": "Quel est votre niveau de stress au quotidien ?",
+            "stress_opts": ["Faible","Modéré","Élevé"],
+            "sec_lifestyle": "Activité physique & habitudes de vie",
+            "activities_q": "À quels types d’activités physiques participez-vous ?",
+            "activities_opts": ["Cardio/Endurance","Renforcement musculaire","Souplesse/Étirements",
+                                "Sports (équipe ou individuel)","Activités de loisir","Danse/Mouvement",
+                                "Activités de plein air","Activités aquatiques","Je ne pratique pas d’activité physique","Autre (à préciser)"],
+            "days_q": "Combien de jours par semaine pratiquez-vous une activité physique ?",
+            "days_opts": ["1–2 jours","2–3 jours","3–4 jours","4–5 jours","5–6 jours","7 jours"],
+            "session_len_q": "En moyenne, quelle est la durée d’une séance ?",
+            "session_len_opts": ["Moins de 30 minutes","30–60 minutes","1–2 heures","Plus de 2 heures"],
+            "mood_link_q": "Comment votre santé mentale influence-t-elle vos habitudes sportives ?",
+            "mood_link_opts": ["Je fais plus de sport quand je suis heureux(se)","Je fais plus de sport quand je suis triste","Mes habitudes sportives sont peu influencées par mon humeur."],
+            "sec_status": "État de santé & antécédents",
+            "overall_health_q": "Comment évaluez-vous votre état de santé global ?",
+            "mobility_q": "Comment évaluez-vous votre mobilité actuelle ?",
+            "surgery_q": "Avez-vous subi une intervention chirurgicale ?",
+            "recovery_q": "Quelle a été la durée de votre convalescence ?",
+            "recovery_opts": ["Moins de 2 semaines","2–4 semaines","1–3 mois","3–6 mois","6–12 mois","Plus d’un an","Convalescence en cours"],
+            "pt_after_q": "Avez-vous suivi une rééducation/kinésithérapie après l’opération ?",
+            "pt_adherence_q": "Avez-vous suivi votre plan de rééducation ?",
+            "sec_big5": "Grands traits de personnalité (1–7)",
+            "big5": {
+                "extrav": "Je me vois comme extraverti(e) et enthousiaste",
+                "quarrel": "Je me vois comme critique et querelleur/querelleuse",
+                "discipline": "Je me vois comme fiable et autodiscipliné(e)",
+                "anxious": "Je me vois comme anxieux(se) et facilement contrarié(e)",
+                "open": "Je me vois comme ouvert(e) aux nouvelles expériences et complexe",
+                "quiet": "Je me vois comme réservé(e) et calme",
+                "warm": "Je me vois comme sympathique et chaleureux(se)",
+                "careless": "Je me vois comme désorganisé(e) et négligent(e)",
+                "stable": "Je me vois comme calme et émotionnellement stable",
+                "uncreative": "Je me vois comme conventionnel(le), peu créatif/ve",
+            }
+        },
     },
 }
 
@@ -580,7 +859,7 @@ Ce formulaire sera conservé de manière sécurisée et conforme au RGPD pour la
 if "lang" not in st.session_state:
     st.session_state.lang = "en"
 
-# Step machine: welcome → consent → intro → survey → guidance
+# Step machine: welcome → consent → survey → guidance
 if "step" not in st.session_state:
     st.session_state.step = "welcome"
 
@@ -621,16 +900,6 @@ def load_json(device_id: str, name: str) -> dict:
             return json.load(f)
     return {}
 
-def export_device_zip_notice():
-    # Export as combined JSON for simplicity
-    consent = load_json(DEVICE_ID, "consent")
-    survey = load_json(DEVICE_ID, "survey")
-    profile = load_json(DEVICE_ID, "profile")
-    bundle = {"device_id": DEVICE_ID, "consent": consent, "survey": survey, "profile": profile}
-    data = json.dumps(bundle, ensure_ascii=False, indent=2)
-    st.download_button(key="export_btn", label=t("export"), data=data,
-                       file_name=f"{DEVICE_ID}_data.json", mime="application/json")
-
 # -----------------
 #  ASSETS
 # -----------------
@@ -647,6 +916,11 @@ def find_asset(*candidates: str) -> Optional[str]:
 def t(key: str) -> str:
     lang = st.session_state.lang
     return STRINGS.get(lang, STRINGS["en"]).get(key, key)
+
+def qs(key: str):
+    """survey helper"""
+    lang = st.session_state.lang
+    return STRINGS.get(lang, STRINGS["en"]).get("survey", {}).get(key)
 
 def header(title_key: str):
     st.markdown(f"<h1 class='center'>{t(title_key)}</h1>", unsafe_allow_html=True)
@@ -681,6 +955,18 @@ def page_welcome():
             st.session_state.lang = "en"
             st.session_state.step = "consent"
             st.rerun()
+            
+    st.markdown("<hr class='soft'/>", unsafe_allow_html=True)
+    st.subheader(t("de_blurb_title"))
+    st.write(t("de_blurb"))
+
+    img = find_asset(
+        "assets/physio2.jpg",
+        "/mnt/data/379fbb7c-b263-4f19-8e5c-e06e0be28db2.png",  # screenshot fourni
+        "/mnt/data/6e2d1f05-aecb-4ab1-b170-33132d9ed6cb.png"   # ancien fallback
+    )
+    if img:
+        st.image(img, use_container_width=True)
 
     st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
 
@@ -689,30 +975,24 @@ def page_consent():
     header("consent_title")
     st.write(t("consent_intro"))
 
-    # --- Localized expander + markdown ---
     with st.expander(t("consent_info_header"), expanded=False):
         st.markdown(t("consent_md"))
 
-    # --- Two required localized checkboxes ---
     agree_info = st.checkbox(t("consent_check1"))
     agree_data = st.checkbox(t("consent_check2"))
 
     can_continue = agree_info and agree_data
 
-    col1, col2 = st.columns([1,1])
-    with col1:
-        if st.button(t("continue"), disabled=not can_continue, use_container_width=True):
-            payload = {
-                "agreed_info": bool(agree_info),
-                "agreed_data": bool(agree_data),
-                "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
-                "lang": st.session_state.lang,
-            }
-            save_json(DEVICE_ID, "consent", payload)
-            st.session_state.step = "intro"
-            st.rerun()
-    with col2:
-        export_device_zip_notice()
+    if st.button(t("continue"), disabled=not can_continue, use_container_width=True):
+        payload = {
+            "agreed_info": bool(agree_info),
+            "agreed_data": bool(agree_data),
+            "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
+            "lang": st.session_state.lang,
+        }
+        save_json(DEVICE_ID, "consent", payload)
+        st.session_state.step = "survey"
+        st.rerun()
 
     st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
 
@@ -749,77 +1029,66 @@ def page_intro():
     st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
 
 
-# ------- STUDY QUESTIONS (Google Form content, compact for mobile) -------
+# ------- STUDY QUESTIONS -------
 def page_study_questions():
     header("study_title")
 
     with st.form("study_form"):
-        st.markdown("### Demographics")
+        st.markdown(f"### {qs('sec_demo')}")
         age = st.selectbox(t("age"), [str(i) for i in range(1, 101)])
-        gender = st.radio("Gender (Biological)", ["Male", "Female"])
-        marital = st.radio("What is your marital status?",
-                           ["Single","Married","Divorced","Widowed","Prefer not to answer"])
+        gender = st.radio(qs("gender_label"), qs("gender_opts"))
+        marital = st.radio(qs("marital_q"), qs("marital_opts"))
 
-        st.markdown("### Health & Accessibility")
-        disability = st.radio("Disability Status", ["Yes","No","Prefer not to answer"])
-        sleep_hours = st.radio("How many hours do you sleep per day on average?",
-                               ["4–5 Hours","5–6 Hours","6–7 Hours","7–8 Hours","8–9 Hours","Less than 4 Hours","More than 9 Hours"])
-        sleep_problem = st.radio("Have you had any problems falling asleep or staying asleep lately?", ["Yes","No"])
+        st.markdown(f"### {qs('sec_health')}")
+        disability = st.radio(qs("disability_q"), qs("yn_opts"))
+        sleep_hours = st.radio(qs("sleep_hours_q"), qs("sleep_hours_opts"))
+        sleep_problem = st.radio(qs("sleep_problem_q"), qs("yn_opts")[:2])  # Yes/No
 
-        st.markdown("### Employment")
-        employment = st.radio("Employment status",
-                              ["Employed","Unemployed","Student","Retired","Unable to work due to disability","Homemaker/caregiver"])
-        industry = st.selectbox("If employed, in which industry do you primarily work?",
-                                ["Healthcare and social assistance","Education","Professional/business services","Retail trade",
-                                 "Manufacturing","Construction","Transportation/warehousing","Food service/accommodation",
-                                 "Government/public administration","Information technology","Finance/insurance","Other (please specify)"])
-        work_type = st.selectbox("Which best describes your primary work activities?",
-                                 ["Office/desk work","Standing service work (retail, reception)","Skilled manual work (trades, repair)",
-                                  "Physical labor (construction, warehouse)","Driving/transportation","Public safety/emergency services","Other"])
+        st.markdown(f"### {qs('sec_employment')}")
+        employment = st.radio(qs("employment_q"), qs("employment_opts"))
+        industry = st.selectbox(qs("industry_q"), qs("industry_opts"))
+        work_type = st.selectbox(qs("work_type_q"), qs("work_type_opts"))
 
-        st.markdown("### Psychological Well-Being and Emotional State")
-        emotional = st.radio("What is your current emotional state?",
-                             ["Happy","Calm","Neutral","Anxious","Frustrated","Sad","Stressed"])
-        stress = st.selectbox("What do you think about your stress level in your daily life?",
-                              ["Low","Moderate","High"])
+        st.markdown(f"### {qs('sec_psych')}")
+        emotional = st.radio(qs("emotional_q"), qs("emotional_opts"))
+        stress = st.selectbox(qs("stress_q"), qs("stress_opts"))
 
-        st.markdown("### Physical Activity and Lifestyle Habits")
-        activities = st.multiselect("What types of physical activities do you participate in?",
-                                    ["Cardio/Aerobic exercise","Strength/Resistance training","Flexibility/Stretching",
-                                     "Sports (team or individual)","Recreational activities","Dance/Movement",
-                                     "Outdoor activities","Water activities","I don't participate in physical activities","Other (please specify)"])
-        days = st.radio("How many days per week do you engage in physical activity or exercise?",
-                        ["1–2 Days","2–3 Days","3–4 Days","4–5 Days","5–6 Days","7 Days"])
-        session_len = st.radio("On average, how long is each physical activity session?",
-                               ["Under 30 minutes","30–60 minutes","1–2 hours","More than 2 hours"])
-        mood_link = st.radio("How do you associate your mental health with your exercise habits?",
-                             ["I exercise more when I am happy","I exercise more when I am sad",
-                              "My exercise habits are not significantly influenced by my mood."])
+        st.markdown(f"### {qs('sec_lifestyle')}")
+        activities = st.multiselect(qs("activities_q"), qs("activities_opts"))
+        days = st.radio(qs("days_q"), qs("days_opts"))
+        session_len = st.radio(qs("session_len_q"), qs("session_len_opts"))
+        mood_link = st.radio(qs("mood_link_q"), qs("mood_link_opts"))
 
-        st.markdown("### Health status & history")
-        overall_health = st.radio("How would you rate your overall health status?", ["1","2","3","4","5"])
-        mobility = st.radio("How would you rate your current mobility?", ["1","2","3","4","5"])
-        surgery = st.radio("Have you undergone any surgical procedure?", ["Yes","No"])
-        recovery = st.radio("How long was your recovery period ?",
-                            ["Under 2 weeks","2–4 weeks","1–3 months","3–6 months","6–12 months","Over 1 year","Ongoing recovery"])
-        pt_after = st.radio("Did you undergo physical therapy after your surgery?", ["Yes","No"])
-        pt_adherence = st.radio("Did you adhere to your prescribed physical therapy plan?", ["1","2","3","4","5"])
+        st.markdown(f"### {qs('sec_status')}")
+        overall_health = st.radio(qs("overall_health_q"), ["1","2","3","4","5"])
+        mobility = st.radio(qs("mobility_q"), ["1","2","3","4","5"])
+        surgery = st.radio(qs("surgery_q"), qs("yn_opts")[:2])
+        recovery = st.radio(qs("recovery_q"), qs("recovery_opts"))
+        pt_after = st.radio(qs("pt_after_q"), qs("yn_opts")[:2])
+        pt_adherence = st.radio(qs("pt_adherence_q"), ["1","2","3","4","5"])
 
-        st.markdown("### Core Personality Dimensions (1–7)")
-        scale7 = ["1","2","3","4","5","6","7"]
+        # --- BIG FIVE (dropdowns 1–7) ---
+        st.markdown(f"### {qs('sec_big5')}")
+        scale7 = [str(i) for i in range(1, 8)]
+        b5 = STRINGS[st.session_state.lang]["survey"]["big5"]
+
+        def big5_select(label: str, default: int = 4) -> str:
+            # default = 4 (milieu) pour éviter un biais
+            return st.selectbox(label, scale7, index=default-1)
+
         big5 = {}
-        big5["extrav"] = st.radio("I see myself as Extraverted and Enthusiastic", scale7, horizontal=True)
-        big5["quarrel"] = st.radio("I see myself as critical and quarrelsome", scale7, horizontal=True)
-        big5["discipline"] = st.radio("I see myself as dependable and self-disciplined", scale7, horizontal=True)
-        big5["anxious"] = st.radio("I see myself as anxious and easily upset", scale7, horizontal=True)
-        big5["open"] = st.radio("I see myself as open to new experiences and complex", scale7, horizontal=True)
-        big5["quiet"] = st.radio("I see myself as reserved and quiet", scale7, horizontal=True)
-        big5["warm"] = st.radio("I see myself as sympathetic and warm", scale7, horizontal=True)
-        big5["careless"] = st.radio("I see myself as disorganized and careless", scale7, horizontal=True)
-        big5["stable"] = st.radio("I see myself as calm and emotionally stable", scale7, horizontal=True)
-        big5["uncreative"] = st.radio("I see myself as conventional, uncreative", scale7, horizontal=True)
+        big5["extrav"]     = big5_select(b5["extrav"], default=4)
+        big5["quarrel"]    = big5_select(b5["quarrel"], default=3)
+        big5["discipline"] = big5_select(b5["discipline"], default=5)
+        big5["anxious"]    = big5_select(b5["anxious"], default=3)
+        big5["open"]       = big5_select(b5["open"], default=5)
+        big5["quiet"]      = big5_select(b5["quiet"], default=4)
+        big5["warm"]       = big5_select(b5["warm"], default=5)
+        big5["careless"]   = big5_select(b5["careless"], default=3)
+        big5["stable"]     = big5_select(b5["stable"], default=4)
+        big5["uncreative"] = big5_select(b5["uncreative"], default=3)
 
-        submitted = st.form_submit_button(t("save_and_continue"))
+        submitted = st.form_submit_button(t("save_and_continue"), type="primary")
         if submitted:
             survey = {
                 "lang": st.session_state.lang,
@@ -850,49 +1119,94 @@ def page_guidance():
             st.session_state.step = "survey"; st.rerun()
         return
 
-    st.subheader("Participant Snapshot")
+    # ---- Snapshot card ----
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.subheader(t("participant_snapshot"))
     cols = st.columns(2)
     with cols[0]:
         st.write(f"**{t('age')}**: {ud.get('age','—')}")
-        st.write(f"**Gender**: {ud.get('gender_bio','—')}")
-        st.write(f"**Employment**: {ud.get('employment','—')}")
-        st.write(f"**Industry**: {ud.get('industry','—')}")
-        st.write(f"**Activities**: {', '.join(ud.get('activities', [])) or '—'}")
+        st.write(f"**{t('gender')}**: {ud.get('gender_bio','—')}")
+        st.write(f"**{t('employment')}**: {ud.get('employment','—')}")
+        st.write(f"**{t('industry')}**: {ud.get('industry','—')}")
+        st.write(f"**{t('activities')}**: {', '.join(ud.get('activities', [])) or '—'}")
     with cols[1]:
-        st.write(f"**Emotion**: {ud.get('emotional','—')}")
-        st.write(f"**Stress**: {ud.get('stress','—')}")
-        st.write(f"**Overall health**: {ud.get('overall_health','—')}/5")
-        st.write(f"**Mobility**: {ud.get('mobility','—')}/5")
-        st.write(f"**Surgery/PT**: {ud.get('surgery','—')} / PT: {ud.get('pt_after','—')}")
+        st.write(f"**{t('emotion')}**: {ud.get('emotional','—')}")
+        st.write(f"**{t('stress')}**: {ud.get('stress','—')}")
+        st.write(f"**{t('overall_health')}**: {ud.get('overall_health','—')}/5")
+        st.write(f"**{t('mobility')}**: {ud.get('mobility','—')}/5")
+        st.write(f"**{t('surgery_pt')}**: {ud.get('surgery','—')} / {t('pt')}: {ud.get('pt_after','—')}")
 
-    st.markdown("---")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.write("")
+
     c_left, c_right = st.columns(2)
+
+    # ---- Chart 1 : Anticipated difficulty ----
     with c_left:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader(t("anticipated"))
+
         df_diff = pd.DataFrame({
-            "Exercise": ["Sit-ups (30s)", "Toe Touch", "Squats", "Calf Raises"],
-            "NumericScore": [3, 3, 3, 3],  # placeholder
+            "Exercise": [t("ex_situps"), t("ex_toe_touch"), t("ex_squats"), t("ex_calf_raises")],
+            "NumericScore": [3, 3, 3, 3],  # placeholder tant qu'on n'a pas la vraie saisie
         })
+        score_map = {
+            1: t("diff1"), 2: t("diff2"), 3: t("diff3"),
+            4: t("diff4"), 5: t("diff5")
+        }
+
         if ALTAIR_AVAILABLE:
-            score_map = {1:"1 - Not difficult",2:"2 - Slightly difficult",3:"3 - Moderately difficult",
-                         4:"4 - Very difficult",5:"5 - Extremely difficult"}
             df = df_diff.copy()
             df["ScoreLabel"] = df["NumericScore"].map(score_map)
-            chart = (
-                alt.Chart(df)
-                .mark_bar(size=32)
+
+            # base WITHOUT padding/config (height is fine, but you can move it too if you want)
+            base = alt.Chart(df).properties(height=280)
+
+            bars = (
+                base.mark_bar(size=34, cornerRadiusTopLeft=8, cornerRadiusTopRight=8, opacity=0.95)
                 .encode(
-                    x=alt.X("Exercise:O", sort=None, axis=alt.Axis(labelAngle=0)),
-                    y=alt.Y("NumericScore:Q", title=t("nrs")),
-                    color=alt.Color("ScoreLabel:N", legend=alt.Legend(title="Difficulty Level"),
-                                    sort=list(score_map.values()))
-                ).properties(height=260)
+                    x=alt.X("Exercise:O", sort=None, axis=alt.Axis(labelAngle=0, title=None)),
+                    y=alt.Y("NumericScore:Q", title=t("nrs"), scale=alt.Scale(domain=[0,5])),
+                    color=alt.value("#2563eb"),
+                    tooltip=[alt.Tooltip("Exercise:N"), alt.Tooltip("NumericScore:Q", title=t("score_word"))],
+                )
             )
+
+            labels = (
+                base.mark_text(dy=-6, fontSize=12)
+                .encode(
+                    x=alt.X("Exercise:O", sort=None),
+                    y=alt.Y("NumericScore:Q"),
+                    text=alt.Text("ScoreLabel:N"),
+                )
+            )
+
+            chart = (
+                alt.layer(bars, labels)
+                  .properties(  # <- put padding (and optionally height) here
+                      height=280,
+                      padding={"left":10,"right":10,"top":10,"bottom":10}
+                  )
+                  .configure(background="white")
+                  .configure_view(stroke=None)
+                  .configure_axis(grid=True, gridColor="#e2e8f0",
+                                  labelColor="#0f172a", titleColor="#0f172a")
+            )
+
             st.altair_chart(chart, use_container_width=True)
         else:
             st.bar_chart(df_diff.set_index("Exercise")["NumericScore"])
+
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+
+    # ---- Chart 2 : Traits ----
     with c_right:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader(t("traits"))
+
         fake_ud = {
             "Extroversion": int(ud.get("big5", {}).get("extrav", "4")),
             "Agreeableness": int(ud.get("big5", {}).get("warm", "5")),
@@ -900,26 +1214,54 @@ def page_guidance():
             "Emotional_Stability": int(ud.get("big5", {}).get("stable", "4")),
             "Openness": int(ud.get("big5", {}).get("open", "5")),
         }
-        # mini chart
-        data = []
         norms = {"Extroversion":4.4, "Agreeableness":5.2, "Conscientiousness":5.4, "Emotional_Stability":4.8, "Openness":5.4}
-        for k,v in fake_ud.items():
-            data += [{"Trait":k,"Group":"User","Score":v},{"Trait":k,"Group":"Norm","Score":norms[k]}]
+
+        trait_labels = {
+            "Extroversion": t("trait_ext"),
+            "Agreeableness": t("trait_agr"),
+            "Conscientiousness": t("trait_con"),
+            "Emotional_Stability": t("trait_emo"),
+            "Openness": t("trait_ope"),
+        }
+
+        data = []
+        for k, v in fake_ud.items():
+            tl = trait_labels[k]
+            data += [
+                {"Trait": tl, "Group": t("group_norm"), "Score": norms[k]},
+                {"Trait": tl, "Group": t("group_user"), "Score": v},
+            ]
         df = pd.DataFrame(data)
+
         if ALTAIR_AVAILABLE:
+            base = alt.Chart(df).properties(height=300, padding={"left":10,"right":10,"top":10,"bottom":10})
+
             chart = (
-                alt.Chart(df)
-                .mark_bar()
-                .encode(x=alt.X("Trait:N", axis=alt.Axis(labelAngle=0), title=None),
-                        y=alt.Y("Score:Q", scale=alt.Scale(domain=[0,7]), title="Score (out of 7)"),
-                        xOffset="Group:N", color="Group:N")
-                .properties(height=300)
-            )
+                base.mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
+                .encode(
+                    x=alt.X("Trait:N", axis=alt.Axis(labelAngle=0, title=None)),
+                    y=alt.Y("Score:Q", scale=alt.Scale(domain=[0,7]), title=t("score_out_of_7")),
+                    xOffset=alt.X("Group:N", sort=[t("group_norm"), t("group_user")]),
+                    color=alt.Color(
+                        "Group:N",
+                        sort=[t("group_norm"), t("group_user")],
+                        legend=alt.Legend(title=t("group"), orient="bottom", columns=2),
+                        scale=alt.Scale(range=["#9ca3af", "#2563eb"]),
+                    ),
+                    tooltip=["Trait:N","Group:N","Score:Q"],
+                )
+            ).configure(background="white") \
+             .configure_view(stroke=None) \
+             .configure_axis(grid=True, gridColor="#e2e8f0",
+                             labelColor="#0f172a", titleColor="#0f172a")
+
             st.altair_chart(chart, use_container_width=True)
         else:
             st.bar_chart(df.pivot(index="Trait", columns="Group", values="Score"))
 
-    st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 # -----------------
@@ -932,8 +1274,6 @@ def main():
         page_welcome()
     elif step == "consent":
         page_consent()
-    elif step == "intro":
-        page_intro()
     elif step == "survey":
         page_study_questions()
     elif step == "guidance":
