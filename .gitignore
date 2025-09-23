@@ -1,21 +1,21 @@
-# Virtual environments
-venv/
-.env
-
-# Byte-compiled / cache
+# Python cache
 __pycache__/
-*.py[cod]
+*.pyc
 
-# Logs
-*.log
-
-# Local data
-data/conversations.txt
-
-# Binary files
-/bin/llama-cli
-
-# Model weights
-/model/*.gguf
-
+# OS
 .DS_Store
+
+# Données locales (ne pas versionner les réponses des participants)
+data/
+
+# Modèles lourds
+model/
+
+# Binaires
+bin/
+
+# Logs (si jamais utilisés)
+logs/
+
+# Environment files
+.env

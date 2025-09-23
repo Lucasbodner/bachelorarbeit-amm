@@ -1,8 +1,4 @@
-streamlit        # UI web
-pandas           # utilisé dans utils/storage pour l'export JSONL
-numpy<2          # dépendance indirecte de pandas (évite conflits)
+streamlit    # UI web
+pandas       # manipulations DataFrame
+altair       # (optionnel mais conseillé pour de plus jolis graphs)
 
-# Pas nécessaires actuellement :
-# torch
-# transformers
-# python-dotenv
