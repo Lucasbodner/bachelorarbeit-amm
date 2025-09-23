@@ -104,6 +104,37 @@ label, .stSelectbox label, .stRadio > label{ color: var(--muted); font-weight: 6
 div[data-baseweb="select"] > div { border-radius:12px; }
 .stSelectbox, .stTextInput, .stNumberInput { margin-bottom: 6px; }
 
+/* Force all form/question labels to solid dark (including MultiSelect) */
+.stMultiSelect > label,
+.stSelectbox > label,
+.stRadio > label,
+.stTextInput > label,
+.stNumberInput > label,
+.stSlider > label,
+label {
+  color: var(--fg) !important;
+  opacity: 1 !important;
+  font-weight: 600 !important;
+}
+
+/* (Optional) make BaseWeb select internals respect dark text */
+div[data-baseweb="select"] label {
+  color: var(--fg) !important;
+  opacity: 1 !important;
+}
+
+/* Improve st.error() readability */
+div.stAlert {                       /* the red box */
+  background: #fee2e2 !important;   /* light red */
+  border: 1px solid #fecaca !important;
+}
+div.stAlert,                        /* text inside the box */
+div.stAlert p,
+div.stAlert span,
+div.stAlert div {
+  color: #7f1d1d !important;        /* dark red text */
+}
+
 /* Single column form spacing */
 .form-wrap > div{ margin-bottom: 8px; }
 
@@ -222,6 +253,8 @@ STRINGS: Dict[str, Dict[str, Any]] = {
             "and predicts how strenuous an exercise will be and whether it will be successful. "
             "The AI assesses how you feel – before you start. You'll be surprised how well it knows you."
         ),
+        "required_answers": "※ Please answer all questions before submitting.",
+        "missing_fields": "Please complete the following required fields: ",
         # --- Guidance page labels (EN) ---
         "participant_snapshot": "Participant Snapshot",
         "industry": "Industry",
@@ -463,6 +496,8 @@ STRINGS: Dict[str, Dict[str, Any]] = {
             "und sagt voraus, wie anstrengend eine Übung erlebt wird und ob sie gelingt. "
             "Die KI schätzt dein Empfinden ein – bevor du loslegst. Du wirst überrascht sein, wie gut sie dich kennt."
         ),
+        "required_answers": "※ Bitte beantworten Sie alle Fragen, bevor Sie das Formular absenden.",
+        "missing_fields": "Bitte füllen Sie die folgenden Pflichtfelder aus: ",
         "participant_snapshot": "Teilnehmer-Snapshot",
         "industry": "Branche",
         "stress": "Stress",
@@ -670,6 +705,8 @@ STRINGS: Dict[str, Dict[str, Any]] = {
             "Il s’appuie sur des modèles mentaux artificiels, prend en compte attentes, forme et humeur – "
             "et prédit l’effort perçu et la réussite d’un exercice avant de commencer."
         ),
+        "required_answers": "※ Veuillez répondre à toutes les questions avant de soumettre le formulaire.",
+        "missing_fields": "Veuillez remplir les champs obligatoires suivants : ",
         "participant_snapshot": "Aperçu du participant",
         "industry": "Secteur",
         "stress": "Stress",
@@ -1054,7 +1091,7 @@ def page_study_questions():
         big5["stable"]     = big5_select(b5["stable"], default=4)
         big5["uncreative"] = big5_select(b5["uncreative"], default=3)
     
-        st.caption("※ Please answer all required questions before submitting.")
+        st.caption(t("required_answers"))
         
         submitted = st.form_submit_button(t("save_and_continue"), type="primary")
         if submitted:
@@ -1065,7 +1102,7 @@ def page_study_questions():
                 missing.append(qs("activities_q"))
 
             if missing:
-                st.error("Please complete the following required fields: " + ", ".join(missing))
+                st.error(t("missing_fields") + ", ".join(missing))
                 st.stop()
 
             survey = {
