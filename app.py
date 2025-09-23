@@ -216,15 +216,26 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "traits": "Personality Traits & Insights",
         "study_title": "Study Questions",
         "save_and_continue": "Save & Continue",
-        "de_blurb_title": "Mentalytics: When AI knows how you feel",
         "de_blurb": (
-            "Hands-on AI: Mentalytics is an AI assistant for rehabilitation and training. "
+            "Mentalytics is an AI assistant for rehabilitation and training. "
             "It uses artificial mental models, takes expectations, fitness and mood into account – "
             "and predicts how strenuous an exercise will be and whether it will be successful. "
             "The AI assesses how you feel – before you start. You'll be surprised how well it knows you."
         ),
         # --- Guidance page labels (EN) ---
         "participant_snapshot": "Participant Snapshot",
+        "industry": "Industry",
+        "stress": "Stress",
+        "surgery": "Surgery",
+        "pt": "Physiotherapy",
+        "surgery_pt": "Surgery/physiotherapy",
+        "difficulty_level": "difficulty level",
+        "score_word": "Score",
+        "level": "Level",
+        "score_out_of_7": "Score (out of 7)",
+        "group": "Group",
+        "group_user": "User",
+        "group_norm": "General Norm",
 
         # Exercises
         "ex_situps": "Sit-ups (30s)",
@@ -446,9 +457,8 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "traits": "Persönlichkeitsmerkmale & Einblicke",
         "study_title": "Studienfragen",
         "save_and_continue": "Speichern & weiter",
-        "de_blurb_title": "Mentalytics: Wenn die KI weiß, wie du dich fühlst",
         "de_blurb": (
-            "KI zum Anfassen: Mentalytics ist ein KI-Assistent für Rehabilitation und Training. "
+            "Mentalytics ist ein KI-Assistent für Rehabilitation und Training. "
             "Er nutzt künstliche mentale Modelle, berücksichtigt Erwartungen, Fitness und Stimmung – "
             "und sagt voraus, wie anstrengend eine Übung erlebt wird und ob sie gelingt. "
             "Die KI schätzt dein Empfinden ein – bevor du loslegst. Du wirst überrascht sein, wie gut sie dich kennt."
@@ -465,7 +475,7 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "score_out_of_7": "Wert (von 7)",
         "group": "Gruppe",
         "group_user": "Nutzer",
-        "group_norm": "Norm",
+        "group_norm": "Allgemeine Norm",
 
         "ex_situps": "Sit-ups (30s)",
         "ex_toe_touch": "Zehenspitzen berühren",
@@ -655,9 +665,8 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "traits": "Traits de personnalité & aperçus",
         "study_title": "Questions d’étude",
         "save_and_continue": "Enregistrer et continuer",
-        "de_blurb_title": "Mentalytics : Quand l'IA sait ce que vous ressentez",
         "de_blurb": (
-            "L'IA à portée de main : Mentalytics est un assistant IA pour la rééducation et l’entraînement. "
+            "Mentalytics est un assistant IA pour la rééducation et l’entraînement. "
             "Il s’appuie sur des modèles mentaux artificiels, prend en compte attentes, forme et humeur – "
             "et prédit l’effort perçu et la réussite d’un exercice avant de commencer."
         ),
@@ -673,7 +682,7 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "score_out_of_7": "Score (sur 7)",
         "group": "Groupe",
         "group_user": "Utilisateur",
-        "group_norm": "Norme",
+        "group_norm": "Norme générale",
 
         "ex_situps": "Sit-ups (30 s)",
         "ex_toe_touch": "Toucher des orteils",
@@ -866,19 +875,32 @@ def device_dir(device_id: str) -> str:
     d = os.path.join("data", device_id)
     os.makedirs(d, exist_ok=True)
     return d
-
-def save_json(device_id: str, name: str, payload: dict):
+    
+# ---- JSONL append helpers (1 line = 1 JSON object) ----
+def append_jsonl(device_id: str, name: str, payload: dict):
     d = device_dir(device_id)
-    path = os.path.join(d, f"{name}.json")
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+    path = os.path.join(d, f"{name}.jsonl")
+    # adds a run_id + timestamp to track runs
+    payload = {
+        **payload,
+        "run_id": datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
+    }
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(payload, ensure_ascii=False) + "\n")
 
-def load_json(device_id: str, name: str) -> dict:
-    path = os.path.join(device_dir(device_id), f"{name}.json")
-    if os.path.isfile(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+def load_latest_jsonl(device_id: str, name: str) -> dict:
+    path = os.path.join(device_dir(device_id), f"{name}.jsonl")
+    if not os.path.isfile(path):
+        return {}
+    last = ""
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                last = line
+    try:
+        return json.loads(last) if last else {}
+    except Exception:
+        return {}
 
 # -----------------
 #  ASSETS
@@ -935,18 +957,15 @@ def page_welcome():
             st.session_state.lang = "en"
             st.session_state.step = "consent"
             st.rerun()
-            
-    st.markdown("<hr class='soft'/>", unsafe_allow_html=True)
-    st.subheader(t("de_blurb_title"))
-    st.write(t("de_blurb"))
 
     img = find_asset(
         "assets/physio2.jpg",
-        "/mnt/data/379fbb7c-b263-4f19-8e5c-e06e0be28db2.png",
-        "/mnt/data/6e2d1f05-aecb-4ab1-b170-33132d9ed6cb.png"  
     )
     if img:
         st.image(img, use_container_width=True)
+        
+    st.markdown("<hr class='soft'/>", unsafe_allow_html=True)
+    st.write(t("de_blurb"))
 
     st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
 
@@ -970,7 +989,7 @@ def page_consent():
             "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
             "lang": st.session_state.lang,
         }
-        save_json(DEVICE_ID, "consent", payload)
+        append_jsonl(DEVICE_ID, "consent", payload)
         st.session_state.step = "survey"
         st.rerun()
 
@@ -1034,9 +1053,21 @@ def page_study_questions():
         big5["careless"]   = big5_select(b5["careless"], default=3)
         big5["stable"]     = big5_select(b5["stable"], default=4)
         big5["uncreative"] = big5_select(b5["uncreative"], default=3)
-
+    
+        st.caption("※ Please answer all required questions before submitting.")
+        
         submitted = st.form_submit_button(t("save_and_continue"), type="primary")
         if submitted:
+            # ---- “required” validations ----
+            missing = []
+            # examples: at least one activity is required; everything else is already enforced by radios/selects
+            if not activities:
+                missing.append(qs("activities_q"))
+
+            if missing:
+                st.error("Please complete the following required fields: " + ", ".join(missing))
+                st.stop()
+
             survey = {
                 "lang": st.session_state.lang,
                 "device_id": DEVICE_ID,
@@ -1050,15 +1081,16 @@ def page_study_questions():
                 "recovery": recovery, "pt_after": pt_after, "pt_adherence": pt_adherence,
                 "big5": big5,
             }
-            save_json(DEVICE_ID, "survey", survey)
+            append_jsonl(DEVICE_ID, "survey", survey)   # <- APPEND, not overwrite
             st.success(t("saved"))
             st.session_state.step = "guidance"
             st.rerun()
 
 
+
 def page_guidance():
 
-    ud = load_json(DEVICE_ID, "survey")
+    ud = load_latest_jsonl(DEVICE_ID, "survey")
     if not ud:
         st.info("No study answers found yet. Please complete the questions first.")
         if st.button(t("back")):
@@ -1068,14 +1100,15 @@ def page_guidance():
 
     c_left, c_right = st.columns(2)
 
-    # ---- Chart 1 : Predicted pain/difficulty (horizontal) ----
+    # ---- Chart 1 : Predicted pain/difficulty ----
     with c_left:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader(t("anticipated"))
 
         df_diff = pd.DataFrame({
-            "Exercise": [t("ex_situps"), t("ex_toe_touch"), t("ex_squats"), t("ex_calf_raises")],
-            "NumericScore": [3, 3, 3, 3],
+            "Exercise": [t("ex_situps")],
+            #t("ex_toe_touch"), t("ex_squats"), t("ex_calf_raises")],
+            "NumericScore": [3],
         })
         score_map = {1: t("diff1"), 2: t("diff2"), 3: t("diff3"), 4: t("diff4"), 5: t("diff5")}
 
@@ -1129,6 +1162,7 @@ def page_guidance():
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader(t("traits"))
 
+        # 5/5 traits taken from responses (or default values)
         fake_ud = {
             "Extroversion": int(ud.get("big5", {}).get("extrav", "4")),
             "Agreeableness": int(ud.get("big5", {}).get("warm", "5")),
@@ -1136,8 +1170,12 @@ def page_guidance():
             "Emotional_Stability": int(ud.get("big5", {}).get("stable", "4")),
             "Openness": int(ud.get("big5", {}).get("open", "5")),
         }
-        norms = {"Extroversion":4.4, "Agreeableness":5.2, "Conscientiousness":5.4, "Emotional_Stability":4.8, "Openness":5.4}
+        norms = {
+            "Extroversion": 4.4, "Agreeableness": 5.2, "Conscientiousness": 5.4,
+            "Emotional_Stability": 4.8, "Openness": 5.4
+        }
 
+        # Localized labels for the X-axis
         trait_labels = {
             "Extroversion": t("trait_ext"),
             "Agreeableness": t("trait_agr"),
@@ -1146,6 +1184,16 @@ def page_guidance():
             "Openness": t("trait_ope"),
         }
 
+        # >>> fixed order of the 5 lines to ensure that they are all displayed
+        order_traits = [
+            t("trait_ext"),
+            t("trait_agr"),
+            t("trait_con"),
+            t("trait_emo"),
+            t("trait_ope"),
+        ]
+
+        # Data (norms vs. user)
         data = []
         for k, v in fake_ud.items():
             tl = trait_labels[k]
@@ -1156,21 +1204,42 @@ def page_guidance():
         df = pd.DataFrame(data)
 
         if ALTAIR_AVAILABLE:
-            base = alt.Chart(df).properties(height=300, padding={"left":10,"right":10,"top":10,"bottom":10})
+            base = alt.Chart(df).properties(
+                height=300,
+                padding={"left": 10, "right": 10, "top": 10, "bottom": 10},
+            )
 
             chart = (
                 base.mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
                 .encode(
-                    x=alt.X("Trait:N", axis=alt.Axis(labelAngle=0, title=None)),
-                    y=alt.Y("Score:Q", scale=alt.Scale(domain=[0,7]), title=t("score_out_of_7")),
+                    # enforce the order and keep the 5 labels
+                    x=alt.X(
+                        "Trait:N",
+                        sort=order_traits,
+                        axis=alt.Axis(
+                            labelAngle=0,
+                            labelFontSize=6,
+                            title=None,
+                            labelColor="#0f172a",
+                            labelLimit=140
+                        ),
+                    ),
+                    y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 7]), title=t("score_out_of_7")),
                     xOffset=alt.X("Group:N", sort=[t("group_norm"), t("group_user")]),
                     color=alt.Color(
                         "Group:N",
                         sort=[t("group_norm"), t("group_user")],
-                        legend=alt.Legend(title=t("group"), orient="bottom", columns=2),
-                        scale=alt.Scale(range=["#9ca3af", "#2563eb"]),
+                        # ► visible legend + dark captions
+                        legend=alt.Legend(
+                            title=t("group"),
+                            orient="bottom",
+                            columns=2,
+                            labelColor="#0f172a",
+                            titleColor="#0f172a",
+                        ),
+                        scale=alt.Scale(range=["#9ca3af", "#2563eb"]),  # Norms = gray, User = blue
                     ),
-                    tooltip=["Trait:N","Group:N","Score:Q"],
+                    tooltip=["Trait:N", "Group:N", "Score:Q"],
                 )
             ).configure(background="white") \
              .configure_view(stroke=None) \
@@ -1180,7 +1249,6 @@ def page_guidance():
             st.altair_chart(chart, use_container_width=True)
         else:
             st.bar_chart(df.pivot(index="Trait", columns="Group", values="Score"))
-
 
         st.markdown("</div>", unsafe_allow_html=True)
 
