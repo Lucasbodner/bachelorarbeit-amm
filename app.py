@@ -7,6 +7,7 @@ import os
 import json
 import uuid
 import datetime
+import base64, mimetypes
 from typing import Optional, List, Dict, Any
 
 import streamlit as st
@@ -207,8 +208,189 @@ div[data-testid="stRadio"] > label {
   color: var(--muted) !important;
   font-weight: 600;
 }
+
+/* === Buttons hover */
+.stButton > button:hover,
+.stButton > button:focus {
+  color: #fff !important;               /* garde le texte blanc visible */
+  background: var(--brand) !important;  /* pas d'inversion de couleurs foireuse */
+  filter: brightness(1.03);
+}
+
+/* === Online binary radios (Yes/No) */
+div[data-testid="stRadio"] div[role="radiogroup"] {
+  display: flex;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+
+/* If there are more than 2 options, we will go back to the select box on the Python side (see helper) */
+
+/* Standardise font size for questions/options */
+div[data-testid="stRadio"] > label,
+.stSelectbox > label,
+.stMultiSelect > label,
+.stTextInput > label {
+  font-size: 0.95rem !important;
+}
+div[data-testid="stRadio"] div[role="radiogroup"] label {
+  font-size: 0.95rem !important;
+}
+
+/* Improves error readability (dark red on light background) */
+div.stAlert, div.stAlert * { color:#7f1d1d !important; }
+
+.header-logos{
+  position: relative;
+  height: 52px;            /* hauteur de la barre */
+  margin-bottom: 8px;      /* espace sous les logos */
+}
+.header-logos img{
+  height: 40px;            /* taille par défaut des logos */
+  object-fit: contain;
+}
+.header-logos .left{ position:absolute; top:0; left:0; }
+.header-logos .right{ position:absolute; top:0; right:0; }
+
+@media (max-width: 600px){
+  .header-logos{ height: 44px; }
+  .header-logos img{ height: 32px; }  /* un peu plus petit sur mobile */
+}
+
+/* Radios binaires (<= 2 options) : une seule ligne */
+div[data-testid="stRadio"] [role="radiogroup"]{
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 16px !important;
+  flex-wrap: nowrap !important;     /* pas de retour à la ligne en desktop */
+  align-items: center !important;
+}
+
+/* chaque option (wrapper) ne doit pas faire 100% de largeur */
+div[data-testid="stRadio"] [role="radiogroup"] > div{
+  display: flex !important;
+  align-items: center !important;
+  width: auto !important;
+}
+
+/* ne pas laisser le texte des options prendre toute la ligne */
+div[data-testid="stRadio"] [role="radiogroup"] label{
+  white-space: nowrap !important;
+  margin: 0 !important;
+}
+
+/* le label de la question reste au-dessus, sobre */
+div[data-testid="stRadio"] > label{
+  margin-bottom: .4rem !important;
+  font-weight: 600 !important;
+}
+
+/* Sur petits écrans, autoriser le wrap proprement */
+@media (max-width: 420px){
+  div[data-testid="stRadio"] [role="radiogroup"]{
+    flex-wrap: wrap !important;   /* si ça ne rentre pas, retour à la ligne */
+    row-gap: 8px !important;
+  }
+}
+
+/* ==== Fix Streamlit Expander hover/contrast on light theme ==== */
+div[data-testid="stExpander"] > details > summary {
+  background: #f1f5f9 !important;          /* clair, lisible */
+  color: var(--fg) !important;              /* texte foncé */
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+}
+
+/* état : ouvert */
+div[data-testid="stExpander"] > details[open] > summary {
+  background: #f8fafc !important;
+  color: var(--fg) !important;
+}
+
+/* survol / focus : garder du contraste, pas de “noir” */
+div[data-testid="stExpander"] > details > summary:hover,
+div[data-testid="stExpander"] > details > summary:focus {
+  background: var(--brand-ghost) !important;  /* bleu très clair */
+  color: var(--fg) !important;
+}
+
+/* s'assurer que tout le contenu hérite bien de la couleur */
+div[data-testid="stExpander"] > details > summary * {
+  color: inherit !important;
+}
+
+/* contenu interne lisible (quand ouvert) */
+div[data-testid="stExpander"] .stMarkdown, 
+div[data-testid="stExpander"] p, 
+div[data-testid="stExpander"] span {
+  color: var(--fg) !important;
+}
+
+/* Normaliser la taille du texte PARTOUT (select, multiselect, checkbox) */
+.stSelectbox > label,
+.stMultiSelect > label,
+div[data-testid="stCheckbox"] > label { font-size: 0.95rem !important; }
+
+/* Valeur/placeholder affichés dans l'input select & multiselect */
+.stSelectbox div[data-baseweb="select"],
+.stMultiSelect div[data-baseweb="select"] { font-size: 0.95rem !important; }
+
+/* Items du menu déroulant BaseWeb (portal) */
+div[role="listbox"] div[role="option"] { font-size: 0.95rem !important; }
+
+/* Texte à droite des cases à cocher */
+div[data-testid="stCheckbox"] label { font-size: 0.95rem !important; }
+
+/* Masquer la barre noire "Deploy" de Streamlit */
+header[data-testid="stHeader"] {
+    display: none;
+}
+
+/* --- Make all dropdown controls WHITE (mobile + desktop) --- */
+.stSelectbox div[data-baseweb="select"] > div,
+.stMultiSelect div[data-baseweb="select"] > div {
+  background: #ffffff !important;              /* white control */
+  color: var(--fg) !important;                 /* dark text */
+  border: 1px solid var(--border) !important;  /* light border */
+  border-radius: 12px !important;
+}
+
+/* caret/icon + placeholder text */
+.stSelectbox div[data-baseweb="select"] svg,
+.stMultiSelect div[data-baseweb="select"] svg {
+  color: var(--muted) !important;
+}
+.stSelectbox div[data-baseweb="select"] input,
+.stMultiSelect div[data-baseweb="select"] input {
+  color: var(--fg) !important;
+}
+
+/* focus ring */
+.stSelectbox div[data-baseweb="select"] > div:focus-within,
+.stMultiSelect div[data-baseweb="select"] > div:focus-within {
+  box-shadow: 0 0 0 3px rgba(37,99,235,.15) !important;
+  border-color: #93c5fd !important;
+}
+
+/* The dropdown MENU (portal) */
+div[role="listbox"] {
+  background: #ffffff !important;              /* white menu */
+  border: 1px solid var(--border) !important;
+}
+div[role="listbox"] div[role="option"] {
+  color: var(--fg) !important;                 /* dark option text */
+}
+
+/* Selected “tags” in MultiSelect */
+.stMultiSelect span[data-baseweb="tag"] {
+  background: #e2e8f0 !important;              /* light gray pill */
+  color: var(--fg) !important;
+  border-color: #cbd5e1 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # -----------------
@@ -218,7 +400,7 @@ STRINGS: Dict[str, Dict[str, Any]] = {
     # ---------- EN ----------
     "en": {
         "app_title": "Mentalytics: When AI Reads Your Mind",
-        "welcome_intro": "Welcome to our pilot study. Please choose your language to continue.",
+        "welcome_intro": "Welcome to our study. Please choose your language to continue.",
         "lang_fr": "Français", "lang_de": "Deutsch", "lang_en": "English",
         "consent_title": "Informed Consent of Participation",
         "consent_intro": "Please review the information below. Tick both boxes to proceed.",
@@ -255,6 +437,12 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         ),
         "required_answers": "※ Please answer all questions before submitting.",
         "missing_fields": "Please complete the following required fields: ",
+        "multi_hint": "(select multiple)",
+        "amm_score": "AMM score",
+        "agree_with_model": "I agree with the model’s prediction",
+        "footer_text": "© 2025 DFKI FedWell",
+        "pt_adherence_opts": ["Not at all","Rarely","Sometimes","Often","Always"],
+
         # --- Guidance page labels (EN) ---
         "participant_snapshot": "Participant Snapshot",
         "industry": "Industry",
@@ -290,6 +478,17 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "diff4": "4 - Very difficult",
         "diff5": "5 - Extremely difficult",
         
+        "likert7": [
+            "Disagree strongly",
+            "Disagree moderately",
+            "Disagree slightly",
+            "Neither agree nor disagree",
+            "Agree slightly",
+            "Agree moderately",
+            "Agree strongly",
+        ],
+
+        
         # Consent (EN)
         "consent_info_header": "Study Information",
         "consent_check1": ("I understand the explanation provided to me. I understand and will follow the hygiene rules of the "
@@ -302,7 +501,8 @@ STRINGS: Dict[str, Dict[str, Any]] = {
                            "financial benefit, or co-authorship). I understand that the material can be published worldwide and may be the subject "
                            "of a press release linked to social media or other promotional activities. Before publication, I can revoke my consent "
                            "at any time. Once the material has been committed to publication it will not be possible to revoke the consent."),
-                # ---- Consent localized strings (EN) ----
+                           
+        # ---- Consent localized strings (EN) ----
         "consent_info_header": "Study Information",
         "consent_check1": ("I understand the explanation provided to me. I understand and will follow the hygiene rules of the "
                            "institution. I understand that this declaration of consent is revocable at any time. I have been given "
@@ -417,8 +617,12 @@ STRINGS: Dict[str, Dict[str, Any]] = {
                               "Manufacturing","Construction","Transportation/warehousing","Food service/accommodation",
                               "Government/public administration","Information technology","Finance/insurance","Other (please specify)"],
             "work_type_q": "Which best describes your primary work activities?",
-            "work_type_opts": ["Office/desk work","Standing service work (retail, reception)","Skilled manual work (trades, repair)",
-                               "Physical labor (construction, warehouse)","Driving/transportation","Public safety/emergency services","Other"],
+            "work_type_opts": [
+              "Office/desk work","Standing service work (retail, reception)",
+              "Skilled manual work (trades, repair)","Physical labor (construction, warehouse)",
+              "Driving/transportation","Public safety/emergency services",
+              "Other (please specify)"
+            ],
             "sec_psych": "Psychological Well-Being and Emotional State",
             "emotional_q": "What is your current emotional state?",
             "emotional_opts": ["Happy","Calm","Neutral","Anxious","Frustrated","Sad","Stressed"],
@@ -443,7 +647,7 @@ STRINGS: Dict[str, Dict[str, Any]] = {
             "recovery_opts": ["Under 2 weeks","2–4 weeks","1–3 months","3–6 months","6–12 months","Over 1 year","Ongoing recovery"],
             "pt_after_q": "Did you undergo physical therapy after your surgery?",
             "pt_adherence_q": "Did you adhere to your prescribed physical therapy plan?",
-            "sec_big5": "Core Personality Dimensions (1–7)",
+            "sec_big5": "Core Personality Dimensions",
             "big5": {
                 "extrav": "I see myself as Extraverted and Enthusiastic",
                 "quarrel": "I see myself as critical and quarrelsome",
@@ -455,13 +659,15 @@ STRINGS: Dict[str, Dict[str, Any]] = {
                 "careless": "I see myself as disorganized and careless",
                 "stable": "I see myself as calm and emotionally stable",
                 "uncreative": "I see myself as conventional, uncreative"
-            }
+            },
+            "video_exercise": "Video-guided exercise",
+            "video_q": "Were you able to perform the exercise?"
         },
     },
     # ---------- DE ----------
     "de": {
         "app_title": "Mentalytics: Wenn die KI weiß, wie du dich fühlst",
-        "welcome_intro": "Willkommen zu unserer Pilotstudie. Bitte wählen Sie eine Sprache aus, um fortzufahren.",
+        "welcome_intro": "Willkommen zu unserer Studie. Bitte wählen Sie eine Sprache aus, um fortzufahren.",
         "lang_fr": "Französisch", "lang_de": "Deutsch", "lang_en": "Englisch",
         "consent_title": "Einverständniserklärung",
         "consent_intro": "Bitte lesen Sie die Informationen unten. Kreuzen Sie beide Kästchen an, um fortzufahren.",
@@ -498,6 +704,12 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         ),
         "required_answers": "※ Bitte beantworten Sie alle Fragen, bevor Sie das Formular absenden.",
         "missing_fields": "Bitte füllen Sie die folgenden Pflichtfelder aus: ",
+        "multi_hint": "(Mehrfachauswahl)",
+        "amm_score": "AMM-Score",
+        "agree_with_model": "Ich stimme der Vorhersage des Modells zu",
+        "footer_text": "© 2025 DFKI FedWell",
+        "pt_adherence_opts": ["Gar nicht","Selten","Manchmal","Oft","Immer"],
+        
         "participant_snapshot": "Teilnehmer-Snapshot",
         "industry": "Branche",
         "stress": "Stress",
@@ -528,6 +740,17 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "diff3": "3 - Mäßig schwierig",
         "diff4": "4 - Sehr schwierig",
         "diff5": "5 - Extrem schwierig",
+        
+        "likert7": [
+            "Trifft überhaupt nicht zu",
+            "Trifft größtenteils nicht zu",
+            "Trifft eher nicht zu",
+            "Weder zutreffend noch unzutreffend",
+            "Trifft eher zu",
+            "Trifft größtenteils zu",
+            "Trifft voll und ganz zu",
+        ],
+
 
         # Consent (DE)
                 "consent_info_header": "Studieninformation",
@@ -628,7 +851,7 @@ STRINGS: Dict[str, Dict[str, Any]] = {
                               "Öffentliche Verwaltung","Informationstechnologie","Finanzen/Versicherungen","Andere (bitte angeben)"],
             "work_type_q": "Welche Tätigkeit beschreibt deine Arbeit am besten?",
             "work_type_opts": ["Büro/Schreibtischarbeit","Stehende Servicearbeit (z. B. Verkauf)","Qualifizierte Handarbeit (Handwerk, Reparatur)",
-                               "Körperliche Arbeit (Bau, Lager)","Fahren/Transport","Sicherheits-/Rettungsdienst","Sonstiges"],
+                               "Körperliche Arbeit (Bau, Lager)","Fahren/Transport","Sicherheits-/Rettungsdienst","Sonstiges (bitte angeben)"],
             "sec_psych": "Psychisches Wohlbefinden & Emotionen",
             "emotional_q": "Wie ist dein aktueller Gefühlszustand?",
             "emotional_opts": ["Glücklich","Gelassen","Neutral","Ängstlich","Frustriert","Traurig","Gestresst"],
@@ -653,25 +876,27 @@ STRINGS: Dict[str, Dict[str, Any]] = {
             "recovery_opts": ["Unter 2 Wochen","2–4 Wochen","1–3 Monate","3–6 Monate","6–12 Monate","Über 1 Jahr","Laufende Genesung"],
             "pt_after_q": "Hattest du danach Physiotherapie?",
             "pt_adherence_q": "Hast du deinen Physio-Plan eingehalten?",
-            "sec_big5": "Kernpersönlichkeitsdimensionen (1–7)",
+            "sec_big5": "Kernpersönlichkeitsdimensionen",
             "big5": {
-                "extrav": "Ich sehe mich als extravertiert und enthusiastisch",
-                "quarrel": "Ich sehe mich als kritisch und streitlustig",
-                "discipline": "Ich sehe mich als zuverlässig und selbstdiszipliniert",
-                "anxious": "Ich sehe mich als ängstlich und leicht aufzuregen",
-                "open": "Ich sehe mich als offen für Neues und komplex",
-                "quiet": "Ich sehe mich als zurückhaltend und ruhig",
-                "warm": "Ich sehe mich als mitfühlend und warmherzig",
-                "careless": "Ich sehe mich als unorganisiert und nachlässig",
-                "stable": "Ich sehe mich als gelassen und emotional stabil",
-                "uncreative": "Ich sehe mich als konventionell, unkreativ"
-            }
+                "extrav": "Ich sehe mich selbst als extravertiert und enthusiastisch",
+                "quarrel": "Ich sehe mich selbst als kritisch und streitlustig",
+                "discipline": "Ich sehe mich selbst als zuverlässig und selbstdiszipliniert",
+                "anxious": "Ich sehe mich selbst als ängstlich und leicht aufzuregen",
+                "open": "Ich sehe mich selbst als offen für Neues und komplex",
+                "quiet": "Ich sehe mich selbst als zurückhaltend und ruhig",
+                "warm": "Ich sehe mich selbst als mitfühlend und warmherzig",
+                "careless": "Ich sehe mich selbst als unorganisiert und nachlässig",
+                "stable": "Ich sehe mich selbst als gelassen und emotional stabil",
+                "uncreative": "Ich sehe mich selbst als konventionell, unkreativ"
+            },
+            "video_exercise": "Exercice guidé par vidéo",
+            "video_q": "Avez-vous pu réaliser l'exercice ?"
         },
     },
     # ---------- FR ----------
     "fr": {
         "app_title": "Mentalytics : Quand l’IA lit dans vos pensées",
-        "welcome_intro": "Bienvenue dans notre étude pilote. Veuillez choisir votre langue pour continuer.",
+        "welcome_intro": "Bienvenue dans notre étude. Veuillez choisir votre langue pour continuer.",
         "lang_fr": "Français", "lang_de": "Allemand", "lang_en": "Anglais",
         "consent_title": "Consentement éclairé à participer",
         "consent_intro": "Veuillez lire les informations ci-dessous. Cochez les deux cases pour continuer.",
@@ -707,6 +932,12 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         ),
         "required_answers": "※ Veuillez répondre à toutes les questions avant de soumettre le formulaire.",
         "missing_fields": "Veuillez remplir les champs obligatoires suivants : ",
+        "multi_hint": "(sélection multiple)",
+        "amm_score": "Score AMM",
+        "agree_with_model": "Je suis d’accord avec la prédiction du modèle",
+        "footer_text": "© 2025 DFKI FedWell",
+        "pt_adherence_opts": ["Pas du tout","Rarement","Parfois","Souvent","Toujours"],
+
         "participant_snapshot": "Aperçu du participant",
         "industry": "Secteur",
         "stress": "Stress",
@@ -737,9 +968,19 @@ STRINGS: Dict[str, Dict[str, Any]] = {
         "diff3": "3 - Modérément difficile",
         "diff4": "4 - Très difficile",
         "diff5": "5 - Extrêmement difficile",
+        
+        "likert7": [
+            "Pas du tout d’accord",
+            "Plutôt pas d’accord",
+            "Un peu en désaccord",
+            "Ni d’accord ni pas d’accord",
+            "Un peu d’accord",
+            "Plutôt d’accord",
+            "Tout à fait d’accord",
+        ],
 
         # Consent (FR)
-                "consent_info_header": "Informations d’étude",
+        "consent_info_header": "Informations d’étude",
         "consent_check1": ("J’ai compris l’explication qui m’a été fournie. Je respecterai les règles d’hygiène de l’institution. "
                            "Je comprends que ce consentement est révocable à tout moment. Une copie de ce formulaire m’a été remise. "
                            "Toutes mes questions ont reçu une réponse satisfaisante et j’accepte volontairement de participer à cette étude de terrain."),
@@ -839,7 +1080,7 @@ STRINGS: Dict[str, Dict[str, Any]] = {
                               "Administration publique","Technologies de l’information","Finance/assurance","Autre (à préciser)"],
             "work_type_q": "Quelle description correspond le mieux à votre activité principale ?",
             "work_type_opts": ["Travail de bureau","Service debout (vente, accueil)","Travail manuel qualifié (métiers, réparation)",
-                               "Travail physique (chantier, entrepôt)","Conduite/transport","Sécurité/services d’urgence","Autre"],
+                               "Travail physique (chantier, entrepôt)","Conduite/transport","Sécurité/services d’urgence","Autre (à préciser)"],
             "sec_psych": "Bien-être psychologique & émotions",
             "emotional_q": "Quel est votre état émotionnel actuel ?",
             "emotional_opts": ["Heureux(se)","Calme","Neutre","Anxieux(se)","Frustré(e)","Triste","Stressé(e)"],
@@ -864,19 +1105,21 @@ STRINGS: Dict[str, Dict[str, Any]] = {
             "recovery_opts": ["Moins de 2 semaines","2–4 semaines","1–3 mois","3–6 mois","6–12 mois","Plus d’un an","Convalescence en cours"],
             "pt_after_q": "Avez-vous suivi une rééducation/kinésithérapie après l’opération ?",
             "pt_adherence_q": "Avez-vous suivi votre plan de rééducation ?",
-            "sec_big5": "Grands traits de personnalité (1–7)",
+            "sec_big5": "Grands traits de personnalité",
             "big5": {
-                "extrav": "Je me vois comme extraverti(e) et enthousiaste",
-                "quarrel": "Je me vois comme critique et querelleur/querelleuse",
-                "discipline": "Je me vois comme fiable et autodiscipliné(e)",
-                "anxious": "Je me vois comme anxieux(se) et facilement contrarié(e)",
-                "open": "Je me vois comme ouvert(e) aux nouvelles expériences et complexe",
-                "quiet": "Je me vois comme réservé(e) et calme",
-                "warm": "Je me vois comme sympathique et chaleureux(se)",
-                "careless": "Je me vois comme désorganisé(e) et négligent(e)",
-                "stable": "Je me vois comme calme et émotionnellement stable",
-                "uncreative": "Je me vois comme conventionnel(le), peu créatif/ve",
-            }
+                "extrav": "Je me considère comme extraverti(e) et enthousiaste",
+                "quarrel": "Je me considère comme critique et querelleur/querelleuse",
+                "discipline": "Je me considère comme fiable et autodiscipliné(e)",
+                "anxious": "Je me considère comme anxieux(se) et facilement contrarié(e)",
+                "open": "Je me considère comme ouvert(e) aux nouvelles expériences et complexe",
+                "quiet": "Je me considère comme réservé(e) et calme",
+                "warm": "Je me considère comme sympathique et chaleureux(se)",
+                "careless": "Je me considère comme désorganisé(e) et négligent(e)",
+                "stable": "Je me considère comme calme et émotionnellement stable",
+                "uncreative": "Je me considère comme conventionnel(le), peu créatif/ve",
+            },
+            "video_exercise": "Exercice guidé par vidéo",
+            "video_q": "Avez-vous pu réaliser l'exercice ?"
         },
     },
 }
@@ -947,6 +1190,14 @@ def find_asset(*candidates: str) -> Optional[str]:
         if os.path.isfile(c):
             return c
     return None
+    
+def data_uri(path: str) -> str:
+    if not path or not os.path.isfile(path):
+        return ""
+    mime, _ = mimetypes.guess_type(path)
+    with open(path, "rb") as f:
+        b64 = base64.b64encode(f.read()).decode("utf-8")
+    return f"data:{mime};base64,{b64}"
 
 
 # -----------------
@@ -974,24 +1225,39 @@ def is_all_filled(d: dict) -> bool:
 #  PAGES
 # -----------------
 def page_welcome():
+        
+    dfki_src = data_uri("assets/dfki_logo.svg")
+    fedwell_src = data_uri("assets/fedwell_logo.png")
+
+    st.markdown(
+        f"""
+        <div class="header-logos">
+            {f'<img class="left"  src="{dfki_src}" alt="DFKI logo"/>' if dfki_src else ""}
+            {f'<img class="right" src="{fedwell_src}" alt="FedWell logo"/>' if fedwell_src else ""}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+                    
     st.markdown(f"<h1 class='center'>{t('app_title')}</h1>", unsafe_allow_html=True)
     st.markdown(f"<p class='center'>{t('welcome_intro')}</p>", unsafe_allow_html=True)
     st.write("")
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        if st.button(f"🇫🇷 {t('lang_fr')}", use_container_width=True):
-            st.session_state.lang = "fr"
-            st.session_state.step = "consent"
-            st.rerun()
-    with c2:
         if st.button(f"🇩🇪 {t('lang_de')}", use_container_width=True):
             st.session_state.lang = "de"
             st.session_state.step = "consent"
             st.rerun()
-    with c3:
+        
+    with c2:
         if st.button(f"🇬🇧 {t('lang_en')}", use_container_width=True):
             st.session_state.lang = "en"
+            st.session_state.step = "consent"
+            st.rerun()
+    with c3:
+        if st.button(f"🇫🇷 {t('lang_fr')}", use_container_width=True):
+            st.session_state.lang = "fr"
             st.session_state.step = "consent"
             st.rerun()
 
@@ -1000,11 +1266,12 @@ def page_welcome():
     )
     if img:
         st.image(img, use_container_width=True)
+
         
     st.markdown("<hr class='soft'/>", unsafe_allow_html=True)
     st.write(t("de_blurb"))
 
-    st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
+    footer()
 
 
 def page_consent():
@@ -1030,102 +1297,219 @@ def page_consent():
         st.session_state.step = "survey"
         st.rerun()
 
-    st.markdown("<div class='footer'>DFKI – FedWell</div>", unsafe_allow_html=True)
+    footer()
+
+def choice_input(label: str, options: List[str], key: str):
+    """
+    - <=2 options  -> radio (1 line via CSS)
+    - >2 options   -> select box
+    Returns the selected value.
+    """
+    if len(options) <= 2:
+        return st.radio(label, options, key=key)
+    return st.selectbox(label, options, key=key)
+
+def with_other_specify(label: str, options: List[str], key: str):
+    value = choice_input(label, options, key=key)
+    other_text = ""
+    if is_other(value):
+        other_text = st.text_input(f"{label} — {specify_label()}", key=f"{key}__other")
+    return value, other_text
+
+    
+def _other_tokens():
+    return ("Other", "Other (please specify)", "Andere", "Andere (bitte angeben)", "Autre", "Autre (à préciser)")
+
+def is_other(value: str) -> bool:
+    return any(tok.lower() in str(value).lower() for tok in _other_tokens())
+
+def specify_label():
+    return "Please specify" if st.session_state.lang=="en" \
+        else "Bitte angeben" if st.session_state.lang=="de" \
+        else "Veuillez préciser"
+
+def multiselect_with_other_specify(label: str, options: List[str], key: str):
+    """Multiselect avec 'Other (…)' qui révèle un champ texte uniquement si sélectionné."""
+    vals = st.multiselect(label, options, key=key)
+    other_txt = ""
+    if any(is_other(v) for v in vals):
+        other_txt = st.text_input(f"{label} — {specify_label()}", key=f"{key}__other")
+    return vals, other_txt
+
+
+def footer():
+    st.markdown(f"<div class='footer'>{t('footer_text')}</div>", unsafe_allow_html=True)
 
 
 # ------- STUDY QUESTIONS -------
 def page_study_questions():
     header("study_title")
 
-    with st.form("study_form"):
-        st.markdown(f"### {qs('sec_demo')}")
-        age = st.selectbox(t("age"), [str(i) for i in range(1, 101)])
-        gender = st.radio(qs("gender_label"), qs("gender_opts"))
-        marital = st.radio(qs("marital_q"), qs("marital_opts"))
+    st.markdown(f"### {qs('sec_demo')}")
+    age = st.selectbox(t("age"), [str(i) for i in range(1, 101)], key="age")
+    gender = choice_input(qs("gender_label"), qs("gender_opts"), key="gender")
+    marital = choice_input(qs("marital_q"), qs("marital_opts"), key="marital")
 
-        st.markdown(f"### {qs('sec_health')}")
-        disability = st.radio(qs("disability_q"), qs("yn_opts"))
-        sleep_hours = st.radio(qs("sleep_hours_q"), qs("sleep_hours_opts"))
-        sleep_problem = st.radio(qs("sleep_problem_q"), qs("yn_opts")[:2])  # Yes/No
+    st.markdown(f"### {qs('sec_health')}")
+    disability = choice_input(qs("disability_q"), qs("yn_opts")[:2], key="disability")
+    sleep_hours = choice_input(qs("sleep_hours_q"), qs("sleep_hours_opts"), key="sleep_hours")
+    sleep_problem = choice_input(qs("sleep_problem_q"), qs("yn_opts")[:2], key="sleep_problem")
 
-        st.markdown(f"### {qs('sec_employment')}")
-        employment = st.radio(qs("employment_q"), qs("employment_opts"))
-        industry = st.selectbox(qs("industry_q"), qs("industry_opts"))
-        work_type = st.selectbox(qs("work_type_q"), qs("work_type_opts"))
+    st.markdown(f"### {qs('sec_employment')}")
+    employment = choice_input(qs("employment_q"), qs("employment_opts"), key="employment")
+    industry, industry_other = with_other_specify(
+        qs("industry_q"),
+        qs("industry_opts"),
+        key="industry"
+    )
+    work_type, work_type_other = with_other_specify(
+        qs("work_type_q"),
+        qs("work_type_opts"),
+        key="work_type"
+    )
 
-        st.markdown(f"### {qs('sec_psych')}")
-        emotional = st.radio(qs("emotional_q"), qs("emotional_opts"))
-        stress = st.selectbox(qs("stress_q"), qs("stress_opts"))
+    st.markdown(f"### {qs('sec_psych')}")
+    emotional = choice_input(qs("emotional_q"), qs("emotional_opts"), key="emotional")
+    stress = choice_input(qs("stress_q"), qs("stress_opts"), key="stress")
 
-        st.markdown(f"### {qs('sec_lifestyle')}")
-        activities = st.multiselect(qs("activities_q"), qs("activities_opts"))
-        days = st.radio(qs("days_q"), qs("days_opts"))
-        session_len = st.radio(qs("session_len_q"), qs("session_len_opts"))
-        mood_link = st.radio(qs("mood_link_q"), qs("mood_link_opts"))
+    st.markdown(f"### {qs('sec_lifestyle')}")
+    activities_label = f"{qs('activities_q')} {t('multi_hint')}"
+    activities, activities_other = multiselect_with_other_specify(
+        activities_label, qs("activities_opts"), key="activities"
+    )
+    days = choice_input(qs("days_q"), qs("days_opts"), key="days")
+    session_len = choice_input(qs("session_len_q"), qs("session_len_opts"), key="session_len")
+    mood_link = choice_input(qs("mood_link_q"), qs("mood_link_opts"), key="mood_link")
 
-        st.markdown(f"### {qs('sec_status')}")
-        overall_health = st.radio(qs("overall_health_q"), ["1","2","3","4","5"])
-        mobility = st.radio(qs("mobility_q"), ["1","2","3","4","5"])
-        surgery = st.radio(qs("surgery_q"), qs("yn_opts")[:2])
-        recovery = st.radio(qs("recovery_q"), qs("recovery_opts"))
-        pt_after = st.radio(qs("pt_after_q"), qs("yn_opts")[:2])
-        pt_adherence = st.radio(qs("pt_adherence_q"), ["1","2","3","4","5"])
+    st.markdown(f"### {qs('sec_status')}")
+    overall_health = choice_input(qs("overall_health_q"), ["1","2","3","4","5"], key="overall_health")
+    mobility = choice_input(qs("mobility_q"), ["1","2","3","4","5"], key="mobility")
+    surgery = choice_input(qs("surgery_q"), qs("yn_opts")[:2], key="surgery")
+    recovery = pt_after = pt_adherence = None
+    if surgery == qs("yn_opts")[:2][0]:  # si OUI
+        recovery = choice_input(qs("recovery_q"), qs("recovery_opts"), key="recovery")
+        pt_after = choice_input(qs("pt_after_q"), qs("yn_opts")[:2], key="pt_after")
+        pt_adherence = choice_input(
+            qs("pt_adherence_q"),
+            t("pt_adherence_opts"),
+            key="pt_adherence"
+        )
+    else:
+        pass
 
-        # --- BIG FIVE (dropdowns 1–7) ---
-        st.markdown(f"### {qs('sec_big5')}")
-        scale7 = [str(i) for i in range(1, 8)]
-        b5 = STRINGS[st.session_state.lang]["survey"]["big5"]
+    st.markdown(f"### {qs('video_exercise')}")
 
-        def big5_select(label: str, default: int = 4) -> str:
-            return st.selectbox(label, scale7, index=default-1)
-
-        big5 = {}
-        big5["extrav"]     = big5_select(b5["extrav"], default=4)
-        big5["quarrel"]    = big5_select(b5["quarrel"], default=3)
-        big5["discipline"] = big5_select(b5["discipline"], default=5)
-        big5["anxious"]    = big5_select(b5["anxious"], default=3)
-        big5["open"]       = big5_select(b5["open"], default=5)
-        big5["quiet"]      = big5_select(b5["quiet"], default=4)
-        big5["warm"]       = big5_select(b5["warm"], default=5)
-        big5["careless"]   = big5_select(b5["careless"], default=3)
-        big5["stable"]     = big5_select(b5["stable"], default=4)
-        big5["uncreative"] = big5_select(b5["uncreative"], default=3)
+    st.video("https://www.youtube.com/embed/PzCTwkJVhWg?start=38&controls=1")
+    video_done = st.radio(
+        qs("video_q"),
+        options=[t("yes"), t("no")],
+        horizontal=True,
+    )
     
-        st.caption(t("required_answers"))
-        
-        submitted = st.form_submit_button(t("save_and_continue"), type="primary")
-        if submitted:
-            # ---- “required” validations ----
-            missing = []
-            # examples: at least one activity is required; everything else is already enforced by radios/selects
-            if not activities:
-                missing.append(qs("activities_q"))
+    # --- BIG FIVE (Likert words, no numbers) ---
+    st.markdown(f"### {qs('sec_big5')}")
 
-            if missing:
-                st.error(t("missing_fields") + ", ".join(missing))
-                st.stop()
+    scale_words = qs("likert7") or [
+        "Disagree strongly",
+        "Disagree moderately",
+        "Disagree slightly",
+        "Neither agree nor disagree",
+        "Agree slightly",
+        "Agree moderately",
+        "Agree strongly",
+    ]
 
-            survey = {
-                "lang": st.session_state.lang,
-                "device_id": DEVICE_ID,
-                "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
-                "age": age, "gender_bio": gender, "marital": marital,
-                "disability": disability, "sleep_hours": sleep_hours, "sleep_problem": sleep_problem,
-                "employment": employment, "industry": industry, "work_type": work_type,
-                "emotional": emotional, "stress": stress,
-                "activities": activities, "days_per_week": days, "session_length": session_len, "mood_link": mood_link,
-                "overall_health": overall_health, "mobility": mobility, "surgery": surgery,
-                "recovery": recovery, "pt_after": pt_after, "pt_adherence": pt_adherence,
-                "big5": big5,
-            }
-            append_jsonl(DEVICE_ID, "survey", survey)   # <- APPEND, not overwrite
-            st.success(t("saved"))
-            st.session_state.step = "guidance"
-            st.rerun()
+    b5_labels = STRINGS[st.session_state.lang]["survey"]["big5"]
 
+    def big5_select(field_key: str, label: str, default_idx: int = 3) -> str:
+        """Selectbox en mots, pas de chiffres. default_idx=3 -> 'Neutral'."""
+        return st.selectbox(label, scale_words, index=default_idx, key=f"b5_{field_key}")
+
+    big5 = {
+        "extrav":     big5_select("extrav",     b5_labels["extrav"],     default_idx=3),
+        "quarrel":    big5_select("quarrel",    b5_labels["quarrel"],    default_idx=2),
+        "discipline": big5_select("discipline", b5_labels["discipline"], default_idx=4),
+        "anxious":    big5_select("anxious",    b5_labels["anxious"],    default_idx=2),
+        "open":       big5_select("open",       b5_labels["open"],       default_idx=4),
+        "quiet":      big5_select("quiet",      b5_labels["quiet"],      default_idx=3),
+        "warm":       big5_select("warm",       b5_labels["warm"],       default_idx=4),
+        "careless":   big5_select("careless",   b5_labels["careless"],   default_idx=2),
+        "stable":     big5_select("stable",     b5_labels["stable"],     default_idx=3),
+        "uncreative": big5_select("uncreative", b5_labels["uncreative"], default_idx=2),
+    }
+
+    st.caption(t("required_answers"))
+
+    clicked = st.button(t("save_and_continue"), type="primary", use_container_width=True)
+    if clicked:
+        missing = []
+        if not activities:
+            missing.append(qs("activities_q"))
+        if any(is_other(v) for v in activities) and not activities_other:
+            missing.append(f"{qs('activities_q')} — {specify_label()}")
+
+        if is_other(industry) and not industry_other:
+            missing.append(f"{qs('industry_q')} — {specify_label()}")
+
+        if is_other(work_type) and not work_type_other:
+            missing.append(f"{qs('work_type_q')} — {specify_label()}")
+
+        if missing:
+            st.error(t("missing_fields") + ", ".join(missing))
+            st.stop()
+
+        survey = {
+            "lang": st.session_state.lang,
+            "device_id": DEVICE_ID,
+            "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
+            "age": age, "gender_bio": gender, "marital": marital,
+            "disability": disability, "sleep_hours": sleep_hours, "sleep_problem": sleep_problem,
+            "employment": employment,
+            "industry": industry, "industry_other": industry_other,
+            "work_type": work_type, "work_type_other": work_type_other,
+            "emotional": emotional, "stress": stress,
+            "activities": activities,
+            "activities_other": activities_other,
+            "days_per_week": days,
+            "session_length": session_len,
+            "mood_link": mood_link,
+            "overall_health": overall_health, "mobility": mobility, "surgery": surgery,
+            "recovery": recovery, "pt_after": pt_after, "pt_adherence": pt_adherence,
+            "big5": big5,
+            "video_done": video_done,
+        }
+
+        append_jsonl(DEVICE_ID, "survey", survey)   # <- append, not overwrite
+        st.success(t("saved"))
+        st.session_state.step = "guidance"
+        st.rerun()
+
+    footer()
+    
+def _likert_scale_words():
+    return qs("likert7") or [
+        "Disagree strongly",
+        "Disagree moderately",
+        "Disagree slightly",
+        "Neither agree nor disagree",
+        "Agree slightly",
+        "Agree moderately",
+        "Agree strongly",
+    ]
+
+def likert_word_to_num(value: str) -> int:
+    """Mappe un libellé Likert (toute langue) vers 1..7. Fallback=4 (Neutral)."""
+    scale = _likert_scale_words()
+    norm = str(value).strip().lower()
+    for i, w in enumerate(scale, start=1):
+        if norm == str(w).strip().lower():
+            return i
+    return 4
 
 
 def page_guidance():
+
+    st.markdown("### Assessment & AMM Prediction")
 
     ud = load_latest_jsonl(DEVICE_ID, "survey")
     if not ud:
@@ -1199,13 +1583,13 @@ def page_guidance():
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader(t("traits"))
 
-        # 5/5 traits taken from responses (or default values)
+        b5_ud = ud.get("big5", {}) or {}
         fake_ud = {
-            "Extroversion": int(ud.get("big5", {}).get("extrav", "4")),
-            "Agreeableness": int(ud.get("big5", {}).get("warm", "5")),
-            "Conscientiousness": int(ud.get("big5", {}).get("discipline", "5")),
-            "Emotional_Stability": int(ud.get("big5", {}).get("stable", "4")),
-            "Openness": int(ud.get("big5", {}).get("open", "5")),
+            "Extroversion":         likert_word_to_num(b5_ud.get("extrav", "Neutral")),
+            "Agreeableness":        likert_word_to_num(b5_ud.get("warm", "Agree")),
+            "Conscientiousness":    likert_word_to_num(b5_ud.get("discipline", "Agree")),
+            "Emotional_Stability":  likert_word_to_num(b5_ud.get("stable", "Neutral")),
+            "Openness":             likert_word_to_num(b5_ud.get("open", "Agree")),
         }
         norms = {
             "Extroversion": 4.4, "Agreeableness": 5.2, "Conscientiousness": 5.4,
@@ -1261,7 +1645,7 @@ def page_guidance():
                             labelLimit=140
                         ),
                     ),
-                    y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 7]), title=t("score_out_of_7")),
+                    y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 7]), title=t("amm_score")),
                     xOffset=alt.X("Group:N", sort=[t("group_norm"), t("group_user")]),
                     color=alt.Color(
                         "Group:N",
@@ -1286,6 +1670,21 @@ def page_guidance():
             st.altair_chart(chart, use_container_width=True)
         else:
             st.bar_chart(df.pivot(index="Trait", columns="Group", values="Score"))
+        
+        agree = st.checkbox(t("agree_with_model"), key="agree_model")
+        # Save user's agreement feedback to JSONL
+        if st.button(t("save_locally"), key="save_agree_btn", use_container_width=True):
+            append_jsonl(
+                DEVICE_ID,
+                "agreement",   # -> data/<DEVICE_ID>/agreement.jsonl
+                {
+                    "device_id": DEVICE_ID,
+                    "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
+                    "lang": st.session_state.lang,
+                    "agree_with_model": bool(agree),
+                },
+            )
+            st.success(t("saved"))
 
         st.markdown("</div>", unsafe_allow_html=True)
 
