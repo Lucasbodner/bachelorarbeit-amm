@@ -1325,7 +1325,6 @@ def specify_label():
         else "Veuillez préciser"
 
 def multiselect_with_other_specify(label: str, options: List[str], key: str):
-    """Multiselect avec 'Other (…)' qui révèle un champ texte uniquement si sélectionné."""
     vals = st.multiselect(label, options, key=key)
     other_txt = ""
     if any(is_other(v) for v in vals):
@@ -1337,7 +1336,6 @@ def footer():
     st.markdown(f"<div class='footer'>{t('footer_text')}</div>", unsafe_allow_html=True)
     
 def render_exercise_video():
-
     local_mp4 = find_asset("assets/situps.mp4", "assets/situps.webm", "assets/situps.mov")
     if local_mp4:
         st.video(local_mp4)
