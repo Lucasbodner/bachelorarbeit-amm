@@ -195,7 +195,7 @@ div[data-testid="stCheckbox"] { opacity: 1 !important; }
 
 .stButton > button { color: #fff !important; }
 
-/* === Radios : forcer le texte des réponses en noir === */
+/* === Radios: Response text must be displayed in black === */
 div[data-testid="stRadio"] div[role="radiogroup"] label,
 div[data-testid="stRadio"] div[role="radiogroup"] span,
 div[data-testid="stRadio"] div[role="radiogroup"] p {
@@ -212,8 +212,8 @@ div[data-testid="stRadio"] > label {
 /* === Buttons hover */
 .stButton > button:hover,
 .stButton > button:focus {
-  color: #fff !important;               /* garde le texte blanc visible */
-  background: var(--brand) !important;  /* pas d'inversion de couleurs foireuse */
+  color: #fff !important;              
+  background: var(--brand) !important; 
   filter: brightness(1.03);
 }
 
@@ -242,11 +242,11 @@ div.stAlert, div.stAlert * { color:#7f1d1d !important; }
 
 .header-logos{
   position: relative;
-  height: 52px;            /* hauteur de la barre */
-  margin-bottom: 8px;      /* espace sous les logos */
+  height: 52px;           
+  margin-bottom: 8px;     
 }
 .header-logos img{
-  height: 40px;            /* taille par défaut des logos */
+  height: 40px;           
   object-fit: contain;
 }
 .header-logos .left{ position:absolute; top:0; left:0; }
@@ -254,94 +254,92 @@ div.stAlert, div.stAlert * { color:#7f1d1d !important; }
 
 @media (max-width: 600px){
   .header-logos{ height: 44px; }
-  .header-logos img{ height: 32px; }  /* un peu plus petit sur mobile */
+  .header-logos img{ height: 32px; } 
 }
 
-/* Radios binaires (<= 2 options) : une seule ligne */
+/* Binary radio buttons (<= 2 options): a single line */
 div[data-testid="stRadio"] [role="radiogroup"]{
   display: flex !important;
   flex-direction: row !important;
   gap: 16px !important;
-  flex-wrap: nowrap !important;     /* pas de retour à la ligne en desktop */
+  flex-wrap: nowrap !important;     
   align-items: center !important;
 }
 
-/* chaque option (wrapper) ne doit pas faire 100% de largeur */
+/* each option (wrapper) must not be 100% wide */
 div[data-testid="stRadio"] [role="radiogroup"] > div{
   display: flex !important;
   align-items: center !important;
   width: auto !important;
 }
 
-/* ne pas laisser le texte des options prendre toute la ligne */
+/* do not let the option text take up the entire line */
 div[data-testid="stRadio"] [role="radiogroup"] label{
   white-space: nowrap !important;
   margin: 0 !important;
 }
 
-/* le label de la question reste au-dessus, sobre */
+/* the question label remains at the top, simple */
 div[data-testid="stRadio"] > label{
   margin-bottom: .4rem !important;
   font-weight: 600 !important;
 }
 
-/* Sur petits écrans, autoriser le wrap proprement */
+/* On small screens, allow proper wrapping */
 @media (max-width: 420px){
   div[data-testid="stRadio"] [role="radiogroup"]{
-    flex-wrap: wrap !important;   /* si ça ne rentre pas, retour à la ligne */
+    flex-wrap: wrap !important;   
     row-gap: 8px !important;
   }
 }
 
 /* ==== Fix Streamlit Expander hover/contrast on light theme ==== */
 div[data-testid="stExpander"] > details > summary {
-  background: #f1f5f9 !important;          /* clair, lisible */
-  color: var(--fg) !important;              /* texte foncé */
+  background: #f1f5f9 !important;          
+  color: var(--fg) !important;             
   border: 1px solid var(--border) !important;
   border-radius: 12px !important;
 }
 
-/* état : ouvert */
 div[data-testid="stExpander"] > details[open] > summary {
   background: #f8fafc !important;
   color: var(--fg) !important;
 }
 
-/* survol / focus : garder du contraste, pas de “noir” */
+/* hover/focus: maintain contrast, no “black” */
 div[data-testid="stExpander"] > details > summary:hover,
 div[data-testid="stExpander"] > details > summary:focus {
-  background: var(--brand-ghost) !important;  /* bleu très clair */
+  background: var(--brand-ghost) !important;  
   color: var(--fg) !important;
 }
 
-/* s'assurer que tout le contenu hérite bien de la couleur */
+/* ensure that all content inherits the color */
 div[data-testid="stExpander"] > details > summary * {
   color: inherit !important;
 }
 
-/* contenu interne lisible (quand ouvert) */
+/* internal content readable (when open) */
 div[data-testid="stExpander"] .stMarkdown, 
 div[data-testid="stExpander"] p, 
 div[data-testid="stExpander"] span {
   color: var(--fg) !important;
 }
 
-/* Normaliser la taille du texte PARTOUT (select, multiselect, checkbox) */
+/* Normalize text size EVERYWHERE (select, multiselect, checkbox) */
 .stSelectbox > label,
 .stMultiSelect > label,
 div[data-testid="stCheckbox"] > label { font-size: 0.95rem !important; }
 
-/* Valeur/placeholder affichés dans l'input select & multiselect */
+/* Value/placeholder displayed in the select & multiselect input */
 .stSelectbox div[data-baseweb="select"],
 .stMultiSelect div[data-baseweb="select"] { font-size: 0.95rem !important; }
 
-/* Items du menu déroulant BaseWeb (portal) */
 div[role="listbox"] div[role="option"] { font-size: 0.95rem !important; }
 
-/* Texte à droite des cases à cocher */
+/* Text to the right of the checkboxes */
 div[data-testid="stCheckbox"] label { font-size: 0.95rem !important; }
 
-/* Masquer la barre noire "Deploy" de Streamlit */
+/* Hide Streamlit's black “Deploy” bar */
 header[data-testid="stHeader"] {
     display: none;
 }
@@ -490,18 +488,6 @@ STRINGS: Dict[str, Dict[str, Any]] = {
 
         
         # Consent (EN)
-        "consent_info_header": "Study Information",
-        "consent_check1": ("I understand the explanation provided to me. I understand and will follow the hygiene rules of the "
-                           "institution. I understand that this declaration of consent is revocable at any time. I have been given "
-                           "a copy of this form. I have had all my questions answered to my satisfaction, and I voluntarily agree to participate in this field study."),
-        "consent_check2": ("I agree that the researchers will take notes during the field study. I understand that all data will be treated "
-                           "confidentially and in compliance with the GDPR. I understand that the material will be anonymized and cannot be "
-                           "associated with my name. I understand that full anonymity cannot be guaranteed and a breach of confidentiality is "
-                           "always possible. From the consent of publication, I cannot derive any rights (such as any explicit acknowledgment, "
-                           "financial benefit, or co-authorship). I understand that the material can be published worldwide and may be the subject "
-                           "of a press release linked to social media or other promotional activities. Before publication, I can revoke my consent "
-                           "at any time. Once the material has been committed to publication it will not be possible to revoke the consent."),
-                           
         # ---- Consent localized strings (EN) ----
         "consent_info_header": "Study Information",
         "consent_check1": ("I understand the explanation provided to me. I understand and will follow the hygiene rules of the "
@@ -660,8 +646,9 @@ STRINGS: Dict[str, Dict[str, Any]] = {
                 "stable": "I see myself as calm and emotionally stable",
                 "uncreative": "I see myself as conventional, uncreative"
             },
-            "video_exercise": "Video-guided exercise",
-            "video_q": "Were you able to perform the exercise?"
+            "video_exercise": "Video-Guided Exercise",
+            "video_q": "How difficult does it look to perform 30 secs sit-ups as shown in the video? Please rate the difficulty on a scale from 1 to 5.",
+            "video_q2": "Please perform 30 sec sit-ups as demonstrated in the video. After completing, rate how difficult you actually found the exercise on a scale from 1 to 5."
         },
     },
     # ---------- DE ----------
@@ -889,8 +876,9 @@ STRINGS: Dict[str, Dict[str, Any]] = {
                 "stable": "Ich sehe mich selbst als gelassen und emotional stabil",
                 "uncreative": "Ich sehe mich selbst als konventionell, unkreativ"
             },
-            "video_exercise": "Exercice guidé par vidéo",
-            "video_q": "Avez-vous pu réaliser l'exercice ?"
+            "video_exercise": "Video-geführte Übungen",
+            "video_q": "Wie schwierig erscheint es Ihnen, 30 Sekunden lang Sit-ups zu machen, wie im Video gezeigt? Bitte bewerten Sie den Schwierigkeitsgrad auf einer Skala von 1 bis 5.",
+            "video_q2": "Bitte führen Sie 30 Sekunden lang Sit-ups durch, wie im Video gezeigt. Bewerten Sie nach Abschluss der Übung auf einer Skala von 1 bis 5, wie schwierig Sie die Übung tatsächlich empfunden haben."
         },
     },
     # ---------- FR ----------
@@ -1118,8 +1106,9 @@ STRINGS: Dict[str, Dict[str, Any]] = {
                 "stable": "Je me considère comme calme et émotionnellement stable",
                 "uncreative": "Je me considère comme conventionnel(le), peu créatif/ve",
             },
-            "video_exercise": "Exercice guidé par vidéo",
-            "video_q": "Avez-vous pu réaliser l'exercice ?"
+            "video_exercise": "Exercices guidés par vidéo",
+            "video_q": "À quel point semble-t-il difficile d'effectuer 30 secondes d'abdominaux comme le montre la vidéo ? Veuillez évaluer la difficulté sur une échelle de 1 à 5.",
+            "video_q2": "Veuillez effectuer 30 secondes d'abdominaux comme indiqué dans la vidéo. Une fois l'exercice terminé, évaluez son niveau de difficulté sur une échelle de 1 à 5."
         },
     },
 }
@@ -1206,6 +1195,13 @@ def data_uri(path: str) -> str:
 def t(key: str) -> str:
     lang = st.session_state.lang
     return STRINGS.get(lang, STRINGS["en"]).get(key, key)
+    
+def scale_words_localized() -> List[str]:
+    """Return the 7-point Likert labels in the current UI language."""
+    lang = st.session_state.lang
+    root = STRINGS.get(lang, STRINGS["en"])
+    return root.get("likert7", STRINGS["en"]["likert7"])
+
 
 def qs(key: str):
     """survey helper"""
@@ -1396,28 +1392,11 @@ def page_study_questions():
         )
     else:
         pass
-
-    st.markdown(f"### {qs('video_exercise')}")
-
-    st.video("https://www.youtube.com/embed/PzCTwkJVhWg?start=38&controls=1")
-    video_done = st.radio(
-        qs("video_q"),
-        options=[t("yes"), t("no")],
-        horizontal=True,
-    )
     
     # --- BIG FIVE (Likert words, no numbers) ---
     st.markdown(f"### {qs('sec_big5')}")
+    scale_words = scale_words_localized()
 
-    scale_words = qs("likert7") or [
-        "Disagree strongly",
-        "Disagree moderately",
-        "Disagree slightly",
-        "Neither agree nor disagree",
-        "Agree slightly",
-        "Agree moderately",
-        "Agree strongly",
-    ]
 
     b5_labels = STRINGS[st.session_state.lang]["survey"]["big5"]
 
@@ -1437,8 +1416,26 @@ def page_study_questions():
         "stable":     big5_select("stable",     b5_labels["stable"],     default_idx=3),
         "uncreative": big5_select("uncreative", b5_labels["uncreative"], default_idx=2),
     }
+    
+    st.markdown(f"### {qs('video_exercise')}")
 
+    video_q1 = choice_input(
+        qs("video_q"),
+        ["1", "2", "3", "4", "5"],
+        key="video_q1"
+    )
+
+    st.video("https://youtu.be/UK3eW6ZQuuc")
+
+    video_q2 = choice_input(
+        qs("video_q2"),
+        ["1", "2", "3", "4", "5"],
+        key="video_q2"
+    )
+
+    
     st.caption(t("required_answers"))
+
 
     clicked = st.button(t("save_and_continue"), type="primary", use_container_width=True)
     if clicked:
@@ -1457,6 +1454,10 @@ def page_study_questions():
         if missing:
             st.error(t("missing_fields") + ", ".join(missing))
             st.stop()
+            
+        video_q1_int = int(video_q1)
+        video_q2_int = int(video_q2)
+
 
         survey = {
             "lang": st.session_state.lang,
@@ -1476,7 +1477,8 @@ def page_study_questions():
             "overall_health": overall_health, "mobility": mobility, "surgery": surgery,
             "recovery": recovery, "pt_after": pt_after, "pt_adherence": pt_adherence,
             "big5": big5,
-            "video_done": video_done,
+            "video_q1": video_q1_int,
+            "video_q2": video_q2_int,
         }
 
         append_jsonl(DEVICE_ID, "survey", survey)   # <- append, not overwrite
@@ -1487,18 +1489,10 @@ def page_study_questions():
     footer()
     
 def _likert_scale_words():
-    return qs("likert7") or [
-        "Disagree strongly",
-        "Disagree moderately",
-        "Disagree slightly",
-        "Neither agree nor disagree",
-        "Agree slightly",
-        "Agree moderately",
-        "Agree strongly",
-    ]
+    return scale_words_localized()
+
 
 def likert_word_to_num(value: str) -> int:
-    """Mappe un libellé Likert (toute langue) vers 1..7. Fallback=4 (Neutral)."""
     scale = _likert_scale_words()
     norm = str(value).strip().lower()
     for i, w in enumerate(scale, start=1):
@@ -1526,10 +1520,15 @@ def page_guidance():
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader(t("anticipated"))
 
+        # Use user's actual difficulty from the survey (video_q2)
+        try:
+            numeric_score = int(ud.get("video_q2", 3))  # fallback 3 if missing
+        except Exception:
+            numeric_score = 3
+
         df_diff = pd.DataFrame({
             "Exercise": [t("ex_situps")],
-            #t("ex_toe_touch"), t("ex_squats"), t("ex_calf_raises")],
-            "NumericScore": [3],
+            "NumericScore": [numeric_score],
         })
         score_map = {1: t("diff1"), 2: t("diff2"), 3: t("diff3"), 4: t("diff4"), 5: t("diff5")}
 
@@ -1639,7 +1638,7 @@ def page_guidance():
                         sort=order_traits,
                         axis=alt.Axis(
                             labelAngle=0,
-                            labelFontSize=6,
+                            labelFontSize=4,
                             title=None,
                             labelColor="#0f172a",
                             labelLimit=140
