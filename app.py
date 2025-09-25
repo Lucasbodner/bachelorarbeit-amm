@@ -1335,6 +1335,32 @@ def multiselect_with_other_specify(label: str, options: List[str], key: str):
 
 def footer():
     st.markdown(f"<div class='footer'>{t('footer_text')}</div>", unsafe_allow_html=True)
+    
+def render_exercise_video():
+
+    local_mp4 = find_asset("assets/situps.mp4", "assets/situps.webm", "assets/situps.mov")
+    if local_mp4:
+        st.video(local_mp4)
+        return
+
+    YT_ID = "UK3eW6ZQuuc"
+    st.markdown(
+        f"""
+        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:1px solid var(--border);">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/{YT_ID}"
+            title="Sit-ups (30s)"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          ></iframe>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 
 
 # ------- STUDY QUESTIONS -------
@@ -1425,7 +1451,7 @@ def page_study_questions():
         key="video_q1"
     )
 
-    st.video("https://youtu.be/UK3eW6ZQuuc")
+    render_exercise_video()
 
     video_q2 = choice_input(
         qs("video_q2"),
